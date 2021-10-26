@@ -2,8 +2,6 @@
 
 EPFL Java mini-project 1
 
-[TOC]
-
 ## Structure
 
 Receive 2 black and white pictures of fingerprints, and return if they represent
@@ -43,7 +41,7 @@ Initial idea (brute force):
 ```java
 public class fingerprinting {
   // Assumes that the pixel given is in the image
-  boolean[] getNeighbors(boolean[][] image, int row, int col) {
+  public static boolean[] getNeighbors(boolean[][] image, int row, int col) {
     boolean topRowInImage = (row > 0);
     boolean rightColumnInImage = (col < image[0].len); // get length of an inner list
     boolean bottomRowInImage = (row < image.len);
@@ -76,10 +74,11 @@ Given the output of `getNeighbors`, count how many are black/`true`.
 public class fingerprinting {
   int blackNeighbors(boolean[] neighbors) {
     int ans = 0;
-    for (boolean i : boolList) {
+    for (boolean i : neighbors) {
       int isTrue = i ? 1 : 0;
       ans += isTrue;
     }
+    return ans;
   }
 }
 ```
@@ -92,8 +91,12 @@ Given the output of `getNeighbors` count how many `false -> true` transitions th
 
 ```java
 public class fingerprinting {
-  int transitions(boolean[] neighbours) {
-      
+  public static int transitions(boolean[] neighbors) {
+    int ans = 0;
+    for (int i = 0; i < neighbors.length; i++) {
+      ans += (!neighbors[i] && neighbors[(i + 1)%6]) ? 1 : 0;
+    }
+    return ans;
   }
 }
 ```
