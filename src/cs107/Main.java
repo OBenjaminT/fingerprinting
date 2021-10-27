@@ -21,10 +21,11 @@ public class Main {
         //---------------------------
         System.out.println("Uncomment the function calls in Main.main to test your implementation.");
         System.out.println("The provided tests are not complete. You have to write your own tests.");
-        testGetNeighbours();
-        testBlackNeighbours();
+/*        testGetNeighbours();
+        testBlackNeighbours();*/
         testTransitions();
-        testIdentical();
+        //testIdentical();
+        testThinninhStep();
         //testConnectedPixels();
         //testOrientation();
         //testApplyRotation();
@@ -181,7 +182,7 @@ public class Main {
     public static void testTransitions() {
         {
             System.out.print("testTransitions 1: ");
-            boolean[] neighbours = {true, false, true, false, true};
+            boolean[] neighbours = {true, false, true, false, false};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 2;
             if (transitions == expected) {
@@ -311,6 +312,33 @@ public class Main {
                 System.out.print("Expected: " + expected);
                 System.out.print("Computed: " + identical);
             }
+        }
+    }
+
+    public static void testThinninhStep() {
+        boolean[][] image = {{false, false, true, true},
+                            {false, false, true, false},
+                            {false, false, false, false},
+                            {false, false, false, false}};
+        boolean[][] expected = {{false, false, true, false},
+                            {false, false, false, false},
+                            {false, false, false, false},
+                            {false, false, false, false}};
+        boolean[][]thinninhStep= Fingerprint.thinningStep(image, 0);
+        boolean same=true;
+        for(int i= 0; i<image.length;++i ){
+            for(int j= 0; j<image.length;++j ){
+                if(image[i][j]!=expected[i][j]){
+                    same=false;
+                }
+            }
+        }
+        System.out.println("");
+        if(same){
+            System.out.println("test1 OK");
+        }
+        else{
+            System.out.println("test1 not OK");
         }
     }
 

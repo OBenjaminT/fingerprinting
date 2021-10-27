@@ -128,7 +128,7 @@ public class Fingerprint {
     public static int transitions(boolean[] neighbours) {
         int ans = 0;
         for (int i = 0; i < neighbours.length; i++) {
-            ans += (!neighbours[i] && neighbours[(i + 1) % 6]) ? 1 : 0;
+            ans += (!neighbours[i] && neighbours[(i + 1) % (neighbours.length-1)]) ? 1 : 0;
         }
         return ans;
     }
@@ -154,18 +154,6 @@ public class Fingerprint {
     }
 
     /**
-     * Internal method used by {@link #thin(boolean[][])}.
-     *
-     * @param image array containing each pixel's boolean value.
-     * @param step  the step to apply, Step 0 or Step 1.
-     * @return A new array containing each pixel's value after the step.
-     */
-    public static boolean[][] thinningStep(boolean[][] image, int step) {
-        //TODO implement
-        return null;
-    }
-
-    /**
      * Compute the skeleton of a boolean image.
      *
      * @param image array containing each pixel's boolean value.
@@ -175,6 +163,43 @@ public class Fingerprint {
     public static boolean[][] thin(boolean[][] image) {
         //TODO implement
         return null;
+    }
+
+    /**
+     * Internal method used by {@link #thin(boolean[][])}.
+     *
+     * @param image array containing each pixel's boolean value.
+     * @param step  the step to apply, Step 0 or Step 1.
+     * @return A new array containing each pixel's value after the step.
+     */
+    public static boolean[][] thinningStep(boolean[][] image, int step) {
+        //TODO implement
+        boolean[][] newImage = new boolean[image.length][image[0].length];
+        for (int i=0; i<image.length;++i){
+            for (int j=0; j<image[i].length;++j){
+                newImage[i][j]=image[i][j];
+                if(     image[i][j]
+                        & !(getNeighbours(image, i, j)==null)
+                        & (blackNeighbours(getNeighbours(image, i, j))>=2 & blackNeighbours(getNeighbours(image, i, j))<=6)
+                        & transitions(getNeighbours(image, i, j))==1){
+                    if(step==0){
+                        if( (!getNeighbours(image, i, j)[0] || !getNeighbours(image, i, j)[2] || !getNeighbours(image, i, j)[4])
+                             &(!getNeighbours(image, i, j)[2] || !getNeighbours(image, i, j)[4] || !getNeighbours(image, i, j)[6]) ){
+                            newImage[i][j]=false;
+                        }
+                    }
+
+                    if(step==1){
+                        if( (!getNeighbours(image, i, j)[0] || !getNeighbours(image, i, j)[2] || !getNeighbours(image, i, j)[6])
+                                &(!getNeighbours(image, i, j)[0] || !getNeighbours(image, i, j)[4] || !getNeighbours(image, i, j)[6]) ){
+                            newImage[i][j]=false;
+                        }
+                    }
+                }
+/*                System.out.print(newImage[i][j]);*/
+            }
+        }
+        return newImage;
     }
 
     /**
