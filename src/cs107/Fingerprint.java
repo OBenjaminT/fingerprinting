@@ -109,10 +109,7 @@ public class Fingerprint {
      */
     public static int blackNeighbours(boolean[] neighbours) {
         int ans = 0;
-        for (boolean i : neighbours) {
-            int isTrue = i ? 1 : 0;
-            ans += isTrue;
-        }
+        for (boolean i : neighbours) ans += i ? 1 : 0;
         return ans;
     }
 
@@ -215,8 +212,31 @@ public class Fingerprint {
      * <code>(row, col)</code>.
      */
     public static boolean[][] connectedPixels(boolean[][] image, int row, int col, int distance) {
-        //TODO implement
-        return null;
+        int squareSideLength = 2 * distance + 1;
+        int topLeftCornerXCoordinate = col - distance;
+        int topLeftCornerYCoordinate = row - distance;
+        boolean[][] clone = new boolean[squareSideLength][squareSideLength];
+        for (int i = 0; i < squareSideLength; i++)
+            for (int j = 0; j < squareSideLength; j++) {
+                int x = topLeftCornerXCoordinate + j;
+                int y = topLeftCornerYCoordinate + i;
+                if (x > 0 && x < image.length && y > 0 && y < image[0].length) {
+                    clone[i][j] = image[x][y];
+                }
+            }
+        boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
+        relevant[distance][distance] = image[row][col];
+        boolean changed = true;
+        while (changed) {
+            changed = false;
+            for (int i = 0; i < squareSideLength; i++)
+                for (int j = 0; j < squareSideLength; j++)
+                    if (blackNeighbours(getNeighbours(relevant, i, j)) > 0 && clone[i][j]) {
+                        changed = true;
+                        relevant[i][j] = true;
+                    }
+        }
+        return relevant;
     }
 
     /**

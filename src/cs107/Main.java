@@ -21,11 +21,14 @@ public class Main {
         //---------------------------
         System.out.println("Uncomment the function calls in Main.main to test your implementation.");
         System.out.println("The provided tests are not complete. You have to write your own tests.");
-/*        testGetNeighbours();
-        testBlackNeighbours();*/
+
+        testGetNeighbours();
+        testBlackNeighbours();
         testTransitions();
+        testIdentical();
+        testConnectedPixels();
         //testIdentical();
-        testThinninhStep();
+        testThinningStep();
         //testConnectedPixels();
         //testOrientation();
         //testApplyRotation();
@@ -151,6 +154,30 @@ public class Main {
                 printArray(neighbours);
             }
         }
+        {
+            System.out.print("testGetNeighbours 6: ");
+            boolean[][] image = {
+                    {true, true, true},
+                    {true, true, true},
+                    {true, true, true}
+            };
+            boolean[] neighbours = Fingerprint.getNeighbours(image, 1, 1);
+            boolean[] expected = {true, true, true, true, true, true, true, true};
+            image = new boolean[][]{
+                    {false, false, false},
+                    {false, false, false},
+                    {false, false, false}
+            };
+            if (arrayEqual(neighbours, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(neighbours);
+            }
+        }
     }
 
 
@@ -222,7 +249,7 @@ public class Main {
             }
         }
         {
-            System.out.print("testIdentical 1: ");
+            System.out.print("testIdentical 2: ");
             boolean[][] x = null;
             boolean[][] y = null;
             boolean identical = Fingerprint.identical(x, y);
@@ -236,7 +263,7 @@ public class Main {
             }
         }
         {
-            System.out.print("testIdentical 1: ");
+            System.out.print("testIdentical 3: ");
             boolean[][] x = {
                     {true, false},
                     {false, true}
@@ -253,7 +280,7 @@ public class Main {
             }
         }
         {
-            System.out.print("testIdentical 1: ");
+            System.out.print("testIdentical 4: ");
             boolean[][] x = {
                     {true, false},
                     {false, true},
@@ -274,7 +301,7 @@ public class Main {
             }
         }
         {
-            System.out.print("testIdentical 1: ");
+            System.out.print("testIdentical 5: ");
             boolean[][] x = {
                     {true, false, true},
                     {false, true, false}
@@ -294,14 +321,14 @@ public class Main {
             }
         }
         {
-            System.out.print("testIdentical 1: ");
+            System.out.print("testIdentical 6: ");
             boolean[][] x = {
                     {true, false},
                     {false, true}
             };
             boolean[][] y = {
                     {true, false},
-                    {false, true}
+                    {false, false}
             };
             boolean identical = Fingerprint.identical(x, y);
             boolean expected = false;
@@ -313,9 +340,33 @@ public class Main {
                 System.out.print("Computed: " + identical);
             }
         }
+        {
+            System.out.print("testIdentical 7: ");
+            boolean[][] x = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean[][] y = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean identical = Fingerprint.identical(x, y);
+            y = new boolean[][]{
+                    {false, false},
+                    {false, true}
+            };
+            boolean expected = true;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
     }
 
-    public static void testThinninhStep() {
+    public static void testThinningStep() {
         boolean[][] image = {{false, false, true, true},
                             {false, false, true, false},
                             {false, false, false, false},
@@ -350,15 +401,19 @@ public class Main {
     public static void testConnectedPixels() {
         {
             System.out.print("testConnectedPixels1: ");
-            boolean[][] image = {{true, false, false, true},
+            boolean[][] image = {
+                    {true, false, false, true},
                     {false, false, true, true},
                     {false, true, true, false},
-                    {false, false, false, false}};
-            boolean[][] expected = {{false, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}};
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 10);
+                    {false, false, false, false}
+            };
+            boolean[][] expected = new boolean[21][21];
+            expected[11][11] = true;
+            expected[11][12] = true;
+            expected[10][12] = true;
+            expected[10][13] = true;
+            expected[9][13] = true;
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
             } else {
