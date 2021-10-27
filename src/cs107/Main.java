@@ -1,6 +1,7 @@
 package cs107;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -21,6 +22,9 @@ public class Main {
         System.out.println("Uncomment the function calls in Main.main to test your implementation.");
         System.out.println("The provided tests are not complete. You have to write your own tests.");
         testGetNeighbours();
+        testBlackNeighbours();
+        testTransitions();
+        testIdentical();
         //testConnectedPixels();
         //testOrientation();
         //testApplyRotation();
@@ -147,6 +151,169 @@ public class Main {
             }
         }
     }
+
+
+    /**
+     * This function is here to help you test the functionalities of
+     * testBlackNeighbours. You are free to modify and/or delete it.
+     */
+    public static void testBlackNeighbours() {
+        {
+            System.out.print("testBlackNeighbours 1: ");
+            boolean[] neighbors = {true};
+            int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
+            int expected = 1;
+            if (blackNeighbours == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + blackNeighbours);
+            }
+        }
+    }
+
+
+    /**
+     * This function is here to help you test the functionalities of
+     * testTransitions. You are free to modify and/or delete it.
+     */
+    public static void testTransitions() {
+        {
+            System.out.print("testTransitions 1: ");
+            boolean[] neighbours = {true, false, true, false, true};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 2;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + transitions);
+            }
+        }
+    }
+
+
+    /**
+     * This function is here to help you test the functionalities of
+     * testIdentical. You are free to modify and/or delete it.
+     */
+    public static void testIdentical() {
+        {
+            System.out.print("testIdentical 1: ");
+            boolean[][] x = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean[][] y = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean identical = Fingerprint.identical(x, y);
+            boolean expected = true;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
+        {
+            System.out.print("testIdentical 1: ");
+            boolean[][] x = null;
+            boolean[][] y = null;
+            boolean identical = Fingerprint.identical(x, y);
+            boolean expected = true;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
+        {
+            System.out.print("testIdentical 1: ");
+            boolean[][] x = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean[][] y = null;
+            boolean identical = Fingerprint.identical(x, y);
+            boolean expected = false;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
+        {
+            System.out.print("testIdentical 1: ");
+            boolean[][] x = {
+                    {true, false},
+                    {false, true},
+                    {false, false}
+            };
+            boolean[][] y = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean identical = Fingerprint.identical(x, y);
+            boolean expected = false;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
+        {
+            System.out.print("testIdentical 1: ");
+            boolean[][] x = {
+                    {true, false, true},
+                    {false, true, false}
+            };
+            boolean[][] y = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean identical = Fingerprint.identical(x, y);
+            boolean expected = false;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
+        {
+            System.out.print("testIdentical 1: ");
+            boolean[][] x = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean[][] y = {
+                    {true, false},
+                    {false, true}
+            };
+            boolean identical = Fingerprint.identical(x, y);
+            boolean expected = false;
+            if (identical == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + identical);
+            }
+        }
+    }
+
 
     /**
      * This function is here to help you test the functionalities of
@@ -437,19 +604,27 @@ public class Main {
     }
 
     public static void printArray(boolean[][] array) {
-        for (boolean[] row : array) {
-            for (boolean pixel : row) {
-                System.out.print(pixel + ",");
+        if (array != null) {
+            for (boolean[] row : array) {
+                for (boolean pixel : row) {
+                    System.out.print(pixel + ",");
+                }
+                System.out.println();
             }
-            System.out.println();
+        } else {
+            System.out.print(Arrays.deepToString(null));
         }
     }
 
     public static void printArray(boolean[] array) {
-        for (boolean pixel : array) {
-            System.out.print(pixel + ",");
+        if (array != null) {
+            for (boolean pixel : array) {
+                System.out.print(pixel + ",");
+            }
+            System.out.println();
+        } else {
+            System.out.print(Arrays.deepToString(null));
         }
-        System.out.println();
     }
 
     public static void printArray(int[] array) {

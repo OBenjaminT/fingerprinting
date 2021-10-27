@@ -6,6 +6,7 @@ package cs107;
 */
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * Provides tools to compare fingerprint.
@@ -141,8 +142,15 @@ public class Fingerprint {
      * otherwise.
      */
     public static boolean identical(boolean[][] image1, boolean[][] image2) {
-        //TODO implement
-        return false;
+        if (image1 == null && image2 == null)
+            return true;
+        if (image1 == null || image2 == null)
+            return false;
+        if (image1.length != image2.length || image1[0].length != image2[0].length)
+            return false;
+        return IntStream.range(0, image1.length).parallel()
+                .noneMatch(i -> IntStream.range(0, image1[0].length).parallel()
+                        .anyMatch(j -> image1[i][j] != image2[i][j]));
     }
 
     /**
