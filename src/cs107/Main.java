@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * This class will not be graded. You can use it to test your program.
  */
-@SuppressWarnings({"null", "unused"})
+@SuppressWarnings("all")
 public class Main {
     /**
      * Main entry point of the program.
@@ -495,11 +495,11 @@ public class Main {
                     {false, false, false, false},
                     {true, false, false, false},
                     {false, false, false, false}};
-            boolean[][] thinninhStep = Fingerprint.thinningStep(image, 1);
+            boolean[][] thinningStep = Fingerprint.thinningStep(image, 1);
             boolean same = true;
-            for (int i = 0; i < thinninhStep.length; ++i) {
-                for (int j = 0; j < thinninhStep.length; ++j) {
-                    if (thinninhStep[i][j] != expected[i][j]) {
+            for (int i = 0; i < thinningStep.length; ++i) {
+                for (int j = 0; j < thinningStep.length; ++j) {
+                    if (thinningStep[i][j] != expected[i][j]) {
                         same = false;
                         break;
                     }
