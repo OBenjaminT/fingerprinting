@@ -5,6 +5,7 @@ package cs107;
 - java.util.Arrays;
 */
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -124,8 +125,16 @@ public class Fingerprint {
      */
     public static int transitions(boolean[] neighbours) {
         int ans = 0;
-        for (int i = 0; i < neighbours.length; i++) {
+/*        for (int i = 0; i < neighbours.length; i++) {
             ans += (!neighbours[i] && neighbours[(i + 1) % (neighbours.length-1)]) ? 1 : 0;
+        }*/
+        for (int i = 0; i < neighbours.length-1; i++) {
+            if(!neighbours[i] & neighbours[i+1] ){
+                ++ans;
+            }
+        }
+        if(!neighbours[neighbours.length-1] & neighbours[0] ){
+            ++ans;
         }
         return ans;
     }
@@ -158,8 +167,26 @@ public class Fingerprint {
      * applying the thinning algorithm.
      */
     public static boolean[][] thin(boolean[][] image) {
-        //TODO implement
-        return null;
+        boolean nochange = false;
+        boolean[][] previous = new boolean[image.length][image[0].length];
+        while(!nochange){
+            nochange = true;
+            for (int i=0; i<image.length;++i){
+                for (int j=0; j<image[i].length;++j) {
+                    previous[i][j]=image[i][j];
+                }
+            }
+            image=thinningStep(image, 0);
+            image=thinningStep(image, 1);
+            for (int i=0; i<image.length;++i){
+                for (int j=0; j<image[i].length;++j) {
+                    if(previous[i][j]!=image[i][j]){
+                        nochange=false;
+                    }
+                }
+            }
+        }
+        return image;
     }
 
     /**
@@ -170,10 +197,10 @@ public class Fingerprint {
      * @return A new array containing each pixel's value after the step.
      */
     public static boolean[][] thinningStep(boolean[][] image, int step) {
-        //TODO implement
         boolean[][] newImage = new boolean[image.length][image[0].length];
         for (int i=0; i<image.length;++i){
             for (int j=0; j<image[i].length;++j){
+                //at first newimage[i][j] is the same, it will then be changed if necessary
                 newImage[i][j]=image[i][j];
                 if(     image[i][j]
                         & !(getNeighbours(image, i, j)==null)
@@ -193,7 +220,6 @@ public class Fingerprint {
                         }
                     }
                 }
-/*                System.out.print(newImage[i][j]);*/
             }
         }
         return newImage;
@@ -249,8 +275,41 @@ public class Fingerprint {
      * @return the slope.
      */
     public static double computeSlope(boolean[][] connectedPixels, int row, int col) {
-        //TODO implement
-        return 0;
+        ArrayList<Integer> xvalues = new ArrayList<Integer>();
+        ArrayList<Integer> yvalues = new ArrayList<Integer>();
+
+        for(int i = 0; i<connectedPixels.length;++i){
+            for(int j = 0; j<connectedPixels[i].length;++j){
+                if(connectedPixels[i][j]& !(i==row & j==col)){
+                    int x = j-col;
+                    int y = row-i;
+                    xvalues.add(x);
+                    yvalues.add(y);
+                }
+            }
+        }
+
+        double xSquared= 0;
+        double ySquared= 0;
+        double xTimesy =0;
+        for(int i =0; i<xvalues.size(); ++i){
+            xSquared+=xvalues.get(i)*xvalues.get(i);
+            ySquared+=yvalues.get(i)*yvalues.get(i);
+            xTimesy += xvalues.get(i)*yvalues.get(i);
+        }
+
+        double slope=0;
+        if(xSquared!=0) {
+            if (xSquared >= ySquared) {
+                slope = xTimesy / xSquared;
+            } else {
+                slope = ySquared / xTimesy;
+            }
+        }
+        else{
+            slope= Double.POSITIVE_INFINITY;
+        }
+        return slope;
     }
 
     /**
@@ -265,8 +324,38 @@ public class Fingerprint {
      * @return the orientation of the minutia in radians.
      */
     public static double computeAngle(boolean[][] connectedPixels, int row, int col, double slope) {
-        //TODO implement
-        return 0;
+        int pixelsAbove=0;
+        int pixelsUnder=0;
+        for(int i = 0; i<connectedPixels.length;++i){
+            for(int j = 0; j<connectedPixels[i].length;++j){
+                if(connectedPixels[i][j]& !(i==row & j==col)) {
+                    int x = j-col;
+                    int y = row-i;
+                    if(y>=-1/slope*x){
+                        ++pixelsAbove;
+                    }
+                    else{
+                        ++pixelsUnder;
+                    }
+                }
+            }
+        }
+        double angle =0;
+        if(slope!=Double.POSITIVE_INFINITY) {
+            angle = Math.atan(slope);
+            if ((angle > 0 & pixelsUnder > pixelsAbove) || (angle < 0 & pixelsUnder < pixelsAbove)) {
+                angle += Math.PI;
+            }
+        }
+        else{
+            if(pixelsAbove > pixelsUnder){
+                angle=Math.PI/2;
+            }
+            else{
+                angle=-Math.PI/2;
+            }
+        }
+        return angle;
     }
 
     /**
@@ -281,8 +370,20 @@ public class Fingerprint {
      * @return The orientation in degrees.
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
-        //TODO implement
-        return 0;
+        //TODO test when getneighbours is correct
+        //boolean[][]connectedPixels = connectedPixels(image, row, col, distance);
+        //uncomment below to test compteOrientation even if connectedPixels doesn't work
+        boolean[][]connectedPixels = {{false, false, false, true, false},
+                {false, false, true, true, false},
+                {false, true, true, false, false},
+                {false, false, false, false, false}};
+        double slope = computeSlope(connectedPixels,row,col);
+        double angle =computeAngle(connectedPixels, row, col, slope);
+        int angleDegrees = (int)Math.round(Math.toDegrees(angle));
+        if(angleDegrees<0){
+            angleDegrees+=360;
+        }
+        return angleDegrees;
     }
 
     /**
@@ -295,8 +396,26 @@ public class Fingerprint {
      * @see #thin(boolean[][])
      */
     public static List<int[]> extract(boolean[][] image) {
-        //TODO implement
-        return null;
+        //TODO please check this code, because I never used lists in java before + there is a problem with the thinned image
+        List<int[]> minutiaes = new ArrayList<int[]>();
+        int[] minutia= new int[3];
+        image = thin(image);
+        for(int i=1; i<image.length-1; ++i){
+            for(int j=1; j<image[i].length-1; ++j){
+                if(image[i][j]){
+                    boolean[] neighbourgs= getNeighbours(image, i, j);
+                    int transitions = transitions(neighbourgs);
+                    if(transitions==1 || transitions==3){
+                        int orientation = computeOrientation(image, i, j, ORIENTATION_DISTANCE);
+                        minutia[0]=i;
+                        minutia[1]=j;
+                        minutia[2]=orientation;
+                        minutiaes.add(minutia);
+                    }
+                }
+            }
+        }
+        return minutiaes;
     }
 
     /**
