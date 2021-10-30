@@ -9,7 +9,6 @@ import java.util.List;
  */
 @SuppressWarnings({"null", "unused"})
 public class Main {
-
     /**
      * Main entry point of the program.
      *
@@ -19,25 +18,54 @@ public class Main {
         //---------------------------
         // Tests functions separately
         //---------------------------
-        System.out.println("Uncomment the function calls in Main.main to test your implementation.");
-        System.out.println("The provided tests are not complete. You have to write your own tests.");
+        //System.out.println("Uncomment the function calls in Main.main to test your implementation.");
+        //System.out.println("The provided tests are not complete. You have to write your own tests.");
 
-        //testComputeSlope();
+        //boolean[][] ar = {
+        //        {true, false, true},
+        //        {false, true, false},
+        //        {true, false, true},
+        //        {false, true, false},
+        //        {true, false, true},
+        //};
+        //boolean[][] br = {
+        //        {false, false, false},
+        //        {false, true, false},
+        //        {false, false, false},
+        //        {false, false, false},
+        //        {false, false, false},
+        //};
+        //boolean[][] cr = {
+        //        {true, true, true},
+        //        {true, true, true},
+        //        {true, true, true},
+        //        {true, true, true},
+        //        {true, true, true},
+        //};
+        //Fingerprint.spreadPixel(ar, br, 1, 1);
+        //printArray(br);
+        //printArray(Fingerprint.subClone(ar, 0, 0, 3));
+        //System.out.println();
+        //boolean[][] clone = Fingerprint.subClone(cr, 0, 0, 3);
+        //printArray(cr);
+        //System.out.println();
+        //printArray(clone);
+
+
+        testGetNeighbours();
+        testBlackNeighbours();
+        testTransitions();
+        testComputeSlope();
         testComputeAngle();
         testComputeOrientation();
-        //testExtract();
-        //testGetNeighbours();
-        //testBlackNeighbours();
-        //testTransitions();
-        //testIdentical();
+        testExtract();
+        testIdentical();
+        testThinningStep();
         //testConnectedPixels();
-        //testIdentical();
-        //testThinningStep();
-        //testConnectedPixels();
-        //testOrientation();
-        //testApplyRotation();
-        //testApplyTranslation();
-        //testThin();
+        testOrientation();
+        testApplyRotation();
+        testApplyTranslation();
+        testThin();
         //testWithSkeleton();
 
         //testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
@@ -235,7 +263,7 @@ public class Main {
      * testTransitions. You are free to modify and/or delete it.
      */
     public static void testTransitions() {
-   /*     {
+        {
             System.out.print("testTransitions 1: ");
             boolean[] neighbours = {true, false, true, false, false};
             int transitions = Fingerprint.transitions(neighbours);
@@ -244,22 +272,21 @@ public class Main {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + transitions);
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
             }
-
-        }*/
+        }
         {
             System.out.print("testTransitions 2: ");
-            boolean[] neighbours2 = {true, true, false, false, false, false, false, false};
-            int transitions2 = Fingerprint.transitions(neighbours2);
-            int expected2 = 1;
-            if (transitions2 == expected2) {
+            boolean[] neighbours = {true, true, false, false, false, false, false, false};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 1;
+            if (transitions == expected) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
-                System.out.print("Expected: " + expected2);
-                System.out.print("Computed: " + transitions2);
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + transitions);
             }
         }
     }
@@ -424,6 +451,7 @@ public class Main {
                 for (int j = 0; j < thinninhStep.length; ++j) {
                     if (thinninhStep[i][j] != expected[i][j]) {
                         same = false;
+                        break;
                     }
                 }
             }
@@ -448,6 +476,7 @@ public class Main {
                 for (int j = 0; j < thinninhStep.length; ++j) {
                     if (thinninhStep[i][j] != expected[i][j]) {
                         same = false;
+                        break;
                     }
                 }
             }
@@ -472,6 +501,7 @@ public class Main {
                 for (int j = 0; j < thinninhStep.length; ++j) {
                     if (thinninhStep[i][j] != expected[i][j]) {
                         same = false;
+                        break;
                     }
                 }
             }
@@ -481,8 +511,27 @@ public class Main {
                 System.out.println("test ThinningStep 3: ERROR");
             }
         }
+        boolean[][] image = {
+                {false, false, true, true},
+                {false, false, true, false},
+                {false, false, false, false},
+                {false, false, false, false}};
+        boolean[][] expected = {
+                {false, false, true, false},
+                {false, false, false, false},
+                {false, false, false, false},
+                {false, false, false, false}};
+        boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
+        boolean same = true;
+        for (int i = 0; i < image.length; ++i)
+            for (int j = 0; j < image.length; ++j)
+                if (image[i][j] != expected[i][j]) {
+                    same = false;
+                    break;
+                }
+        System.out.println();
+        System.out.println(same ? "test1 OK" : "test1 not OK");
     }
-
 
     /**
      * This function is here to help you test the functionalities of
@@ -566,8 +615,8 @@ public class Main {
                     {false, true, true, false, false},
                     {false, false, false, false, false}};
             double expected = 0.7;
-            double slope = Fingerprint.computeSlope(image,2,1 );
-            if (slope==expected) {
+            double slope = Fingerprint.computeSlope(image, 2, 1);
+            if (slope == expected) {
                 System.out.println("test ComputeSlope 1: OK");
             } else {
                 System.out.println("test ComputeSlope 1: ERROR");
@@ -583,9 +632,9 @@ public class Main {
                     {false, true, true, false, false},
                     {false, false, false, false, false}};
             double expected = Math.atan(0.7);
-            double slope = Fingerprint.computeSlope(image,2,1 );
-            double angle = Fingerprint.computeAngle(image,2,1, slope);
-            if (angle==expected) {
+            double slope = Fingerprint.computeSlope(image, 2, 1);
+            double angle = Fingerprint.computeAngle(image, 2, 1, slope);
+            if (angle == expected) {
                 System.out.println("test ComputeAngle 1: OK");
             } else {
                 System.out.println("test ComputeAngle 1: ERROR");
@@ -594,20 +643,23 @@ public class Main {
     }
 
     public static void testExtract() {
-        //TODO improve test, this one is temporary until getConnectedPixelsworks
+        //TODO improve test, this one is temporary until getConnectedPixels works
         {
-            //this test only works if you comment the thining process in the extract methode, because the thining removes all but one black( which is normal btw)
-            boolean[][] image = {{false, false, false, true, false},
-                                {false, false, true, true, false},
-                                {false, true, true, false, false},
-                                {false, false, false, false, false}};
-            double slope = Fingerprint.computeSlope(image,2,1 );
-            double angle = Fingerprint.computeAngle(image,2,1, slope);
-            int angleDegrees = (int)Math.round(Math.toDegrees(angle));
+            // this test only works if you comment the thinning process in the extract method,
+            // because the thinning removes all but one black (which is normal btw)
+            boolean[][] image = {
+                    {false, false, false, true, false},
+                    {false, false, true, true, false},
+                    {false, true, true, false, false},
+                    {false, false, false, false, false}
+            };
+            double slope = Fingerprint.computeSlope(image, 2, 1);
+            double angle = Fingerprint.computeAngle(image, 2, 1, slope);
+            int angleDegrees = (int) Math.round(Math.toDegrees(angle));
             boolean same = true;
             List<int[]> minutiaes = Fingerprint.extract(image);
-            if(minutiaes.get(0)[0]!=2 || minutiaes.get(0)[1]!=1 || minutiaes.get(0)[2]!=angleDegrees){
-                same=false;
+            if (minutiaes.get(0)[0] != 2 || minutiaes.get(0)[1] != 1 || minutiaes.get(0)[2] != angleDegrees) {
+                same = false;
             }
             if (same) {
                 System.out.println("test Extract 1: OK");
@@ -617,21 +669,22 @@ public class Main {
         }
     }
 
-    public static void testComputeOrientation (){
+    public static void testComputeOrientation() {
         {
             boolean[][] image = {{false, false, false, true, false},
                     {false, false, true, true, false},
                     {false, true, true, false, false},
                     {false, false, false, false, false}};
             double expected = Math.round(Math.toDegrees(Math.atan(0.7)));
-            double angle = Fingerprint.computeOrientation(image,2,1, 30);
-            if (angle==expected) {
+            double angle = Fingerprint.computeOrientation(image, 2, 1, 30);
+            if (angle == expected) {
                 System.out.println("test ComputeOrientation 1: OK");
             } else {
                 System.out.println("test ComputeOrientation 1: ERROR");
             }
         }
     }
+
     /**
      * This function is here to help you test the functionalities of
      * computeOrientation. You are free to modify and/or delete it.
@@ -749,7 +802,7 @@ public class Main {
         {
             boolean[][] skeleton1 = Helper.readBinary("resources/test_inputs/skeletonTest.png");
             List<int[]> minutiae1 = Fingerprint.extract(skeleton1);
-            List<int[]> expected = new ArrayList<int[]>();
+            List<int[]> expected = new ArrayList<>();
             expected.add(new int[]{39, 21, 264});
             expected.add(new int[]{53, 33, 270});
 
@@ -762,18 +815,6 @@ public class Main {
             int[][] colorImageSkeleton1 = Helper.fromBinary(skeleton1);
             Helper.drawMinutia(colorImageSkeleton1, minutiae1);
             Helper.writeARGB("minutiae_skeletonTest.png", colorImageSkeleton1);
-        }
-    }
-
-    public static void printMinutiae(List<int[]> minutiae) {
-        for (int[] minutia : minutiae) {
-            System.out.print("[");
-            for (int j = 0; j < minutia.length; j++) {
-                System.out.print(minutia[j]);
-                if (j != minutia.length - 1)
-                    System.out.print(", ");
-            }
-            System.out.println("],");
         }
     }
 
@@ -819,6 +860,12 @@ public class Main {
             testCompareFingerprints(name1, finger + "_" + i, expectedResult);
         }
     }
+
+    //
+    // UTIL
+    //
+    // NOT TESTS
+    //
 
     /*
      * Helper functions to print and compare arrays
@@ -882,5 +929,17 @@ public class Main {
             System.out.print(pixel + ",");
         }
         System.out.println();
+    }
+
+    public static void printMinutiae(List<int[]> minutiae) {
+        for (int[] minutia : minutiae) {
+            System.out.print("[");
+            for (int j = 0; j < minutia.length; j++) {
+                System.out.print(minutia[j]);
+                if (j != minutia.length - 1)
+                    System.out.print(", ");
+            }
+            System.out.println("],");
+        }
     }
 }
