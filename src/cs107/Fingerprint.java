@@ -396,7 +396,7 @@ public class Fingerprint {
      * @see #thin(boolean[][])
      */
     public static List<int[]> extract(boolean[][] image) {
-        //TODO please check this code, because I never used lists in java before + there is a problem with the thinned image
+        //TODO please check this code, because I never used lists in java before
         List<int[]> minutiaes = new ArrayList<int[]>();
         int[] minutia= new int[3];
         image = thin(image);
@@ -428,8 +428,15 @@ public class Fingerprint {
      * @return the minutia rotated around the given center.
      */
     public static int[] applyRotation(int[] minutia, int centerRow, int centerCol, int rotation) {
-        //TODO implement
-        return null;
+        int x = minutia[1]-centerCol;
+        int y = centerRow - minutia[0];
+        int newX= (int)Math.round(x * Math.cos(rotation*Math.PI/180) -y*Math.sin(rotation*Math.PI/180));
+        int newY= (int)Math.round(x * Math.sin(rotation*Math.PI/180) +y*Math.cos(rotation*Math.PI/180));
+        int newRow = centerRow - newY;
+        int newCol = newX +centerCol;
+        int newOrientation = (minutia[2] + rotation)%360;
+        int[] newMinutiae = {newRow, newCol,newOrientation};
+        return newMinutiae;
     }
 
     /**

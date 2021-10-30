@@ -35,7 +35,7 @@ public class Main {
         //testThinningStep();
         //testConnectedPixels();
         //testOrientation();
-        //testApplyRotation();
+        testApplyRotation();
         //testApplyTranslation();
         //testThin();
         //testWithSkeleton();
