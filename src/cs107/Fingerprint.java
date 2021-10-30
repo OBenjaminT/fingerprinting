@@ -448,8 +448,10 @@ public class Fingerprint {
      * @return the translated minutia.
      */
     public static int[] applyTranslation(int[] minutia, int rowTranslation, int colTranslation) {
-        //TODO implement
-        return null;
+        int newRow = minutia[0]-rowTranslation;
+        int newCol = minutia[1]-colTranslation;
+        int[] newMinutiae= {newRow, newCol, minutia[2]};
+        return newMinutiae;
     }
 
     /**
