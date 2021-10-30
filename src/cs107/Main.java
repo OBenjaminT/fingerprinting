@@ -701,6 +701,9 @@ public class Main {
         }
     }
 
+    public static void testApplyTransformation() {
+        //TODO test this
+    }
     /**
      * This function is here to help you test the functionalities of extract.
      * It will read the first fingerprint and extract the minutiae. It will save

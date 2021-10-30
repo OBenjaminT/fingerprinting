@@ -468,8 +468,9 @@ public class Fingerprint {
      */
     public static int[] applyTransformation(int[] minutia, int centerRow, int centerCol, int rowTranslation,
                                             int colTranslation, int rotation) {
-        //TODO implement
-        return null;
+        int[] translatedMinutiae = applyRotation(minutia, centerRow, centerCol, rotation);
+        int[] rotatedTranslatedMinutiae= applyTranslation(translatedMinutiae, rowTranslation, colTranslation);
+        return rotatedTranslatedMinutiae;
     }
 
     /**
@@ -486,8 +487,11 @@ public class Fingerprint {
      */
     public static List<int[]> applyTransformation(List<int[]> minutiae, int centerRow, int centerCol, int rowTranslation,
                                                   int colTranslation, int rotation) {
-        //TODO implement
-        return null;
+        for(int i =0; i<minutiae.size(); ++i) {
+            int[] rotatedTranslatedMinutiae = applyTransformation(minutiae.get(i), centerRow, centerCol, rowTranslation, colTranslation, rotation);
+            minutiae.add(rotatedTranslatedMinutiae);
+        }
+        return minutiae;
     }
 
     /**
