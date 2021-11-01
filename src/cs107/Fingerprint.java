@@ -163,7 +163,7 @@ public class Fingerprint {
     public static boolean[][] thin(boolean[][] image) {
         boolean[][] previous = new boolean[image.length][image[0].length]; // define the dimensions of the image
         do {
-            for (int i = 0; i < image.length; ++i) // copy every row of image into previous
+            for (int i = 0; i < image.length; i++) // copy every row of image into previous
                 System.arraycopy(image[i], 0, previous[i], 0, image[i].length);
             image = thinningStep(thinningStep(image, 0), 1); // run both thinning steps
         } while (!identical(previous, image)); // repeat if there was a change
@@ -179,8 +179,8 @@ public class Fingerprint {
      */
     public static boolean[][] thinningStep(boolean[][] image, int step) {
         boolean[][] newImage = new boolean[image.length][image[0].length];
-        for (int i = 0; i < image.length; ++i) // for every pixel
-            for (int j = 0; j < image[i].length; ++j) {
+        for (int i = 0; i < image.length; i++) // for every pixel
+            for (int j = 0; j < image[i].length; j++) {
                 boolean[] neighbours = getNeighbours(image, i, j); // simplifies the logic below
                 // @formatter:off
                 newImage[i][j] = image[i][j] // if the pixel is black it stays black (image[i][j] && ...) == false
@@ -285,8 +285,8 @@ public class Fingerprint {
         ArrayList<Integer> xValues = new ArrayList<>();
         ArrayList<Integer> yValues = new ArrayList<>();
 
-        for (int i = 0; i < connectedPixels.length; ++i)
-            for (int j = 0; j < connectedPixels[i].length; ++j)
+        for (int i = 0; i < connectedPixels.length; i++)
+            for (int j = 0; j < connectedPixels[i].length; j++)
                 if (connectedPixels[i][j] && !(i == row && j == col)) {
                     int x = j - col;
                     int y = row - i;
@@ -328,8 +328,8 @@ public class Fingerprint {
         int pixelsAbove = 0;
         int pixelsUnder = 0;
 
-        for (int i = 0; i < connectedPixels.length; ++i)
-            for (int j = 0; j < connectedPixels[i].length; ++j)
+        for (int i = 0; i < connectedPixels.length; i++)
+            for (int j = 0; j < connectedPixels[i].length; j++)
                 if (connectedPixels[i][j]
                         && !(i == row && j == col)) {
                     int x = j - col;
@@ -382,8 +382,8 @@ public class Fingerprint {
         ArrayList<int[]> minutiaes = new ArrayList<>();
         int[] minutia = new int[3];
         image = thin(image);
-        for (int i = 1; i < image.length - 1; ++i)
-            for (int j = 1; j < image[i].length - 1; ++j)
+        for (int i = 1; i < image.length - 1; i++)
+            for (int j = 1; j < image[i].length - 1; j++)
                 if (image[i][j]) {
                     boolean[] neighbors = getNeighbours(image, i, j);
                     assert neighbors != null;
@@ -474,7 +474,7 @@ public class Fingerprint {
                                                   int rowTranslation,
                                                   int colTranslation,
                                                   int rotation) {
-        for (int i = 0; i < minutiae.size(); ++i) {
+        for (int i = 0; i < minutiae.size(); i++) {
             int[] rotatedTranslatedMinutiae = applyTransformation(minutiae.get(i), centerRow, centerCol, rowTranslation, colTranslation, rotation);
             minutiae.add(rotatedTranslatedMinutiae);
         }
