@@ -496,8 +496,23 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        //TODO implement
-        return 0;
+        int matches = 0;
+        for(int[] m1 : minutiae1 ){
+            int j =0;
+            //this boolean makes sure that m doesn't match with more than one minutiae from minutiae2
+            boolean notfound = true;
+            while(j<minutiae2.size() && notfound){
+                int[]m2 = minutiae2.get(j);
+                boolean distance = Math.sqrt((m1[0]-m2[0])*(m1[0]-m2[0])-(m1[1]-m2[1])*(m1[1]-m2[1]))<=maxDistance;
+                boolean orientation =Math.abs(m1[2]-m2[2])<=maxOrientation;
+                if(distance && orientation){
+                    ++matches;
+                    notfound = false;
+                }
+                ++j;
+            }
+        }
+        return matches;
     }
 
     /**

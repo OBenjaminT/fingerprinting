@@ -28,6 +28,7 @@ public class Main {
         testConnectedPixels();
         testSpreadPixel();
         testSubClone();
+        testmatchingMinutiaeCount();
 
         // Un-tested
         /*
@@ -1012,6 +1013,44 @@ public class Main {
     public static void testApplyTransformation() {
         //TODO test this
     }
+    public static void testmatchingMinutiaeCount() {
+        {
+            ArrayList<int[]> minutiae1 = new ArrayList<>();
+            minutiae1.add(new int[]{1,50,36});
+            minutiae1.add(new int[]{5,25,96});
+            ArrayList<int[]> minutiae2 = new ArrayList<>();
+            minutiae2.add(new int[]{1,50,36});
+            minutiae2.add(new int[]{5,25,96});
+            int result = Fingerprint.matchingMinutiaeCount(minutiae1, minutiae2, Fingerprint.DISTANCE_THRESHOLD, Fingerprint.ORIENTATION_DISTANCE );
+            int expected = 2;
+            if(result == expected){
+                System.out.println("testmatchingMinutiaeCount 1 : OK");
+            }
+            else{
+                System.out.println("testmatchingMinutiaeCount 1 : ERROR");
+            }
+        }
+
+        {
+            ArrayList<int[]> minutiae1 = new ArrayList<>();
+            minutiae1.add(new int[]{150,50,36});
+            minutiae1.add(new int[]{5,25,96});
+            minutiae1.add(new int[]{15,32,109});
+            ArrayList<int[]> minutiae2 = new ArrayList<>();
+            minutiae2.add(new int[]{151,50,37});
+            minutiae2.add(new int[]{5,25,96});
+            minutiae2.add(new int[]{60,32,192});
+            int result = Fingerprint.matchingMinutiaeCount(minutiae1, minutiae2, Fingerprint.DISTANCE_THRESHOLD, Fingerprint.ORIENTATION_DISTANCE );
+            int expected = 2;
+            if(result == expected){
+                System.out.println("testmatchingMinutiaeCount 2 : OK");
+            }
+            else{
+                System.out.println("testmatchingMinutiaeCount 2 : ERROR");
+            }
+        }
+    }
+
 
     /**
      * This function is here to help you test the functionalities of extract.
