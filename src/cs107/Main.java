@@ -50,9 +50,9 @@ public class Main {
         //Helper.show(sq, "spread");
         //Helper.show(connectedPixels, "result");
 
-        //testConnectedPixels();
-        testspreadPixel();
-        testSubClone();
+        testConnectedPixels();
+        //testSpreadPixel();
+        //testSubClone();
 
 
         //testComputeSlope();
@@ -630,7 +630,7 @@ public class Main {
     public static void testConnectedPixels() {
         // TODO more tests
         {
-            System.out.print("testConnectedPixels1: ");
+            System.out.print("testConnectedPixels 1: ");
             boolean[][] image = {
                     {true, false, false, true},
                     {false, false, true, true},
@@ -655,7 +655,7 @@ public class Main {
             }
         }
         {
-            System.out.print("testConnectedPixels2: ");
+            System.out.print("testConnectedPixels 2: ");
             boolean[][] image = {
                     {true, false, false, true},
                     {false, false, true, true},
@@ -679,7 +679,7 @@ public class Main {
             }
         }
         {
-            System.out.print("testConnectedPixels3: ");
+            System.out.print("testConnectedPixels 3: ");
             boolean[][] image = {
                     {true, false, false, true, true},
                     {true, false, true, true, false},
@@ -705,88 +705,96 @@ public class Main {
         }
     }
 
-    public static void testspreadPixel() {
-        // TODO more tests
+    public static void testSpreadPixel() {
         {
-            System.out.print("testConnectedPixels1: ");
+            System.out.print("testSpreadPixel 1: ");
             boolean[][] image = {
                     {true, false, false, true},
-                    {false, false, true, true},
+                    {false, true, false, true},
                     {false, true, true, false},
                     {false, false, false, false}
             };
-            boolean[][] expected = new boolean[21][21];
-            expected[11][11] = true;
-            expected[11][12] = true;
-            expected[10][12] = true;
-            expected[10][13] = true;
-            expected[9][13] = true;
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
-            if (arrayEqual(connectedPixels, expected)) {
+            int squareSideLength = 3;
+            int col = 1;
+            int row = 1;
+            boolean[][] clone = Fingerprint.ArrayCloneSquare(image, squareSideLength);
+            boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
+            relevant[row][col] = image[row][col];
+            boolean[][] expected = new boolean[squareSideLength][squareSideLength];
+            expected[1][1] = true;
+            expected[0][0] = true;
+            expected[2][1] = true;
+            expected[2][2] = true;
+            Fingerprint.spreadPixel(clone, relevant, row, col);
+            if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
                 System.out.print("Expected: ");
                 printArray(expected);
                 System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printArray(relevant);
             }
         }
         {
-            System.out.print("testConnectedPixels2: ");
+            System.out.print("testSpreadPixel 2: ");
             boolean[][] image = {
                     {true, false, false, true},
-                    {false, false, true, true},
+                    {false, false, false, true},
                     {false, true, true, false},
                     {false, false, false, false}
             };
-            boolean[][] expected = {
-                    {false, false, true},
-                    {false, true, true},
-                    {false, false, false}
-            };
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
-            if (arrayEqual(connectedPixels, expected)) {
+            int squareSideLength = 3;
+            int col = 1;
+            int row = 1;
+            boolean[][] clone = Fingerprint.ArrayCloneSquare(image, squareSideLength);
+            boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
+            relevant[row][col] = image[row][col];
+            boolean[][] expected = new boolean[squareSideLength][squareSideLength];
+            Fingerprint.spreadPixel(clone, relevant, row, col);
+            if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
                 System.out.print("Expected: ");
                 printArray(expected);
                 System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printArray(relevant);
             }
         }
         {
-            System.out.print("testConnectedPixels3: ");
+            System.out.print("testSpreadPixel 3: ");
             boolean[][] image = {
-                    {true, false, false, true, true},
-                    {true, false, true, true, false},
-                    {true, true, false, false, false},
-                    {false, true, false, true, false}
+                    {true, false, false, true},
+                    {false, true, false, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
             };
-            boolean[][] expected = {
-                    {true, false, false, true, false},
-                    {true, false, true, true, false},
-                    {true, true, false, false, false},
-                    {false, true, false, false, false}
-            };
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 2);
-            if (arrayEqual(connectedPixels, expected)) {
+            int squareSideLength = 3;
+            int col = 0;
+            int row = 0;
+            boolean[][] clone = Fingerprint.ArrayCloneSquare(image, squareSideLength);
+            boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
+            relevant[row][col] = image[row][col];
+            boolean[][] expected = new boolean[squareSideLength][squareSideLength];
+            expected[0][0] = true;
+            expected[1][1] = true;
+            Fingerprint.spreadPixel(clone, relevant, row, col);
+            if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
                 System.out.print("Expected: ");
                 printArray(expected);
                 System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printArray(relevant);
             }
         }
     }
 
     public static void testSubClone() {
-        // TODO more tests
         {
-            System.out.print("testConnectedPixels1: ");
+            System.out.print("testSubClone1: ");
             boolean[][] image = {
                     {true, false, false, true},
                     {false, false, true, true},
@@ -794,69 +802,89 @@ public class Main {
                     {false, false, false, false}
             };
             boolean[][] expected = new boolean[21][21];
-            expected[11][11] = true;
-            expected[11][12] = true;
-            expected[10][12] = true;
-            expected[10][13] = true;
-            expected[9][13] = true;
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
-            if (arrayEqual(connectedPixels, expected)) {
+            expected[0][0] = true;
+            expected[0][3] = true;
+            expected[1][2] = true;
+            expected[1][3] = true;
+            expected[2][1] = true;
+            expected[2][2] = true;
+            boolean[][] clone = Fingerprint.subClone(image, 0, 0, 21);
+            if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
                 System.out.print("Expected: ");
                 printArray(expected);
                 System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printArray(clone);
             }
         }
         {
-            System.out.print("testConnectedPixels2: ");
+            System.out.print("testSubClone2: ");
             boolean[][] image = {
                     {true, false, false, true},
                     {false, false, true, true},
                     {false, true, true, false},
                     {false, false, false, false}
             };
-            boolean[][] expected = {
-                    {false, false, true},
-                    {false, true, true},
-                    {false, false, false}
-            };
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
-            if (arrayEqual(connectedPixels, expected)) {
+            boolean[][] expected = new boolean[21][21];
+            expected[0][0] = true;
+            expected[0][1] = true;
+            boolean[][] clone = Fingerprint.subClone(image, 2, 1, 21);
+            if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
                 System.out.print("Expected: ");
                 printArray(expected);
                 System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printArray(clone);
             }
         }
         {
-            System.out.print("testConnectedPixels3: ");
+            System.out.print("testSubClone3: ");
             boolean[][] image = {
-                    {true, false, false, true, true},
-                    {true, false, true, true, false},
-                    {true, true, false, false, false},
-                    {false, true, false, true, false}
+                    {true, false, false, true},
+                    {false, false, true, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
             };
-            boolean[][] expected = {
-                    {true, false, false, true, false},
-                    {true, false, true, true, false},
-                    {true, true, false, false, false},
-                    {false, true, false, false, false}
-            };
-            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 2);
-            if (arrayEqual(connectedPixels, expected)) {
+            boolean[][] expected = new boolean[21][21];
+            expected[10][10] = true;
+            expected[10][13] = true;
+            expected[11][12] = true;
+            expected[11][13] = true;
+            expected[12][11] = true;
+            expected[12][12] = true;
+            boolean[][] clone = Fingerprint.subClone(image, -10, -10, 21);
+            if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
                 System.out.println("ERROR");
                 System.out.print("Expected: ");
                 printArray(expected);
                 System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printArray(clone);
+            }
+        }
+        {
+            System.out.print("testSubClone4: ");
+            boolean[][] image = {
+                    {true, false, false, true},
+                    {false, false, true, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = new boolean[0][0];
+            boolean[][] clone = Fingerprint.subClone(image, 0, 0, 0);
+            if (arrayEqual(clone, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(clone);
             }
         }
     }

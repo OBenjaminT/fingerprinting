@@ -220,15 +220,17 @@ public class Fingerprint {
         boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
         relevant[distance][distance] = image[row][col];
         while (true) {
-            boolean[][] previousArray = new boolean[squareSideLength][squareSideLength];
-            IntStream.range(0, squareSideLength)
-                    .forEach(i -> System.arraycopy(relevant[i], 0, previousArray[i], 0, squareSideLength));
+            boolean[][] previousArray = ArrayCloneSquare(relevant, squareSideLength);
             for (int i = 0; i < squareSideLength; i++)
                 for (int j = 0; j < squareSideLength; j++)
-                    spreadPixel(clone, relevant, i, j);
-            if (!identical(previousArray, relevant)) break;
+                    spreadPixel(clone, relevant, i, j); // make every pixel "infect" its neighbours
+            if (identical(previousArray, relevant)) break;
         }
         return relevant;
+    }
+
+    static boolean[][] ArrayCloneSquare(boolean[][] image, int width) {
+        return subClone(image, 0, 0, width);
     }
 
     static boolean[][] subClone(boolean[][] image, int topLeftRow, int topLeftCol, int width) {
@@ -239,7 +241,6 @@ public class Fingerprint {
                 int col = topLeftCol + j;
                 if (row >= 0 && row < image.length && col >= 0 && col < image[0].length)
                     clone[i][j] = image[row][col];
-                    // clone[i+1][j+1] = image[row][col];
             }
         return clone;
     }
@@ -247,9 +248,10 @@ public class Fingerprint {
     static void spreadPixel(boolean[][] imageSubset, boolean[][] subsetClone, int row, int col) {
         // check if pixel is in the image bounds
         if (row < 0 || row >= imageSubset.length || col < 0 || col >= imageSubset[0].length) return;
+        if (!subsetClone[row][col]) return; // if the pixel is false it doesn't spread
 
         boolean topRowInImage = (row > 0);
-        boolean rightColumnInImage = (col < (imageSubset[0].length - 1)); // get length of an inner list
+        boolean rightColumnInImage = (col < (imageSubset[0].length - 1));
         boolean bottomRowInImage = (row < (imageSubset.length - 1));
         boolean leftColumnInImage = (col > 0);
 
