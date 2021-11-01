@@ -280,8 +280,12 @@ public final class Helper {
      * @param length      the length of the line.
      * @param color       the color of the line.
      */
-    public static void addLine(final int[][] image, final int rowStart, final int colStart, final double orientation,
-                               final int length, final int color) {
+    public static void addLine(final int[][] image,
+                               final int rowStart,
+                               final int colStart,
+                               final double orientation,
+                               final int length,
+                               final int color) {
         final int rowEnd = (int) Math.round(rowStart - length * Math.sin(orientation));
         final int colEnd = (int) Math.round(colStart + length * Math.cos(orientation));
 
@@ -330,7 +334,10 @@ public final class Helper {
      * @param radius    the radius of the circle.
      * @param color     the color of the line.
      */
-    public static void addCircle(final int[][] image, final int rowCenter, final int colCenter, final int radius,
+    public static void addCircle(final int[][] image,
+                                 final int rowCenter,
+                                 final int colCenter,
+                                 final int radius,
                                  final int color) {
         for (int i = 0; i < 360; i++) {
             final int row = rowCenter + (int) Math.round(radius * Math.sin(Math.toRadians(i)));

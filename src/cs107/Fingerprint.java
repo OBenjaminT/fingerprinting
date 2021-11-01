@@ -107,6 +107,7 @@ public class Fingerprint {
      * @return the number of black/<code>true</code> neighbours.
      */
     public static int blackNeighbours(boolean[] neighbours) {
+        assert neighbours != null;
         int ans = 0;
         for (boolean i : neighbours) ans += i ? 1 : 0;
         return ans;
@@ -122,6 +123,7 @@ public class Fingerprint {
      * @return the number of white to black transitions.
      */
     public static int transitions(boolean[] neighbours) {
+        assert neighbours != null;
         int ans = 0;
         for (int i = 0; i < neighbours.length; i++)
             ans += !neighbours[i] && neighbours[(i + 1) % neighbours.length] ? 1 : 0;
@@ -213,20 +215,18 @@ public class Fingerprint {
         int squareSideLength = 2 * distance + 1;
         int topLeftCornerXCoordinate = col - distance;
         int topLeftCornerYCoordinate = row - distance;
-        boolean[][] clone = subClone(image, topLeftCornerXCoordinate, topLeftCornerYCoordinate, squareSideLength);
+        boolean[][] clone = subClone(image, topLeftCornerYCoordinate, topLeftCornerXCoordinate, squareSideLength);
 
         boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
         relevant[distance][distance] = image[row][col];
-        boolean changed = true;
-        while (changed) {
-            changed = false;
+        while (true) {
             boolean[][] previousArray = new boolean[squareSideLength][squareSideLength];
             IntStream.range(0, squareSideLength)
                     .forEach(i -> System.arraycopy(relevant[i], 0, previousArray[i], 0, squareSideLength));
             for (int i = 0; i < squareSideLength; i++)
                 for (int j = 0; j < squareSideLength; j++)
                     spreadPixel(clone, relevant, i, j);
-            if (!identical(previousArray, relevant)) changed = true;
+            if (!identical(previousArray, relevant)) break;
         }
         return relevant;
     }
@@ -237,8 +237,9 @@ public class Fingerprint {
             for (int j = 0; j < width; j++) {
                 int row = topLeftRow + i;
                 int col = topLeftCol + j;
-                if (row > 0 && row < image.length && col > 0 && col < image[0].length)
+                if (row >= 0 && row < image.length && col >= 0 && col < image[0].length)
                     clone[i][j] = image[row][col];
+                    // clone[i+1][j+1] = image[row][col];
             }
         return clone;
     }

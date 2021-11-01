@@ -18,55 +18,51 @@ public class Main {
         //---------------------------
         // Tests functions separately
         //---------------------------
-        //System.out.println("Uncomment the function calls in Main.main to test your implementation.");
-        //System.out.println("The provided tests are not complete. You have to write your own tests.");
 
-        //boolean[][] ar = {
-        //        {true, false, true},
-        //        {false, true, false},
-        //        {true, false, true},
-        //        {false, true, false},
-        //        {true, false, true},
-        //};
-        //boolean[][] br = {
-        //        {false, false, false},
-        //        {false, true, false},
-        //        {false, false, false},
-        //        {false, false, false},
-        //        {false, false, false},
-        //};
-        //boolean[][] cr = {
-        //        {true, true, true},
-        //        {true, true, true},
-        //        {true, true, true},
-        //        {true, true, true},
-        //        {true, true, true},
-        //};
-        //Fingerprint.spreadPixel(ar, br, 1, 1);
-        //printArray(br);
-        //printArray(Fingerprint.subClone(ar, 0, 0, 3));
-        //System.out.println();
-        //boolean[][] clone = Fingerprint.subClone(cr, 0, 0, 3);
-        //printArray(cr);
-        //System.out.println();
-        //printArray(clone);
+        //testGetNeighbours();
+        //testBlackNeighbours();
+        //testTransitions();
+        //testIdentical();
+        //testThinningStep();
 
 
-        testGetNeighbours();
-        testBlackNeighbours();
-        testTransitions();
-        testComputeSlope();
-        testComputeAngle();
-        testComputeOrientation();
-        testExtract();
-        testIdentical();
-        testThinningStep();
+        boolean[][] image = {
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
+        };
+        //boolean[][] expected = new boolean[21][21];
+        //expected[11][11] = true;
+        //expected[11][12] = true;
+        //expected[10][12] = true;
+        //expected[10][13] = true;
+        //expected[9][13] = true;
+        //boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 10);
+        //Helper.show(image, "image");
+        //Helper.show(expected, "expected");
+        //var rel = new boolean[21][21];
+        //rel[11][11] = true;
+        //Helper.show(rel, "spread");
+        //var sq = Fingerprint.subClone(image, 2, 1, 10);
+        //Fingerprint.spreadPixel(sq, rel, 11, 11);
+        //Helper.show(rel, "spread");
+        //Helper.show(sq, "spread");
+        //Helper.show(connectedPixels, "result");
+
         //testConnectedPixels();
-        testOrientation();
-        testApplyRotation();
-        testApplyTranslation();
-        testThin();
-        //testWithSkeleton();
+        testspreadPixel();
+        testSubClone();
+
+
+        //testComputeSlope();
+        //testComputeAngle();
+        //testExtract();
+        //testComputeOrientation();
+        //testOrientation();
+        //testApplyRotation();
+        //testApplyTranslation();
+        //testThin();
 
         //testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
         //testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
@@ -75,6 +71,8 @@ public class Main {
         //testDrawMinutiae("1_1"); //draw minutiae of fingerprint 1_1.png
         //testDrawMinutiae("1_2"); //draw minutiae of fingerprint 1_2.png
         //testDrawMinutiae("2_1"); //draw minutiae of fingerprint 2_1.png
+
+        //testWithSkeleton();
 
         //---------------------------
         // Test overall functionality
@@ -97,10 +95,6 @@ public class Main {
         //}
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * getNeighbours. You are free to modify and/or delete it.
-     */
     public static void testGetNeighbours() {
         {
             System.out.print("testGetNeighbours 1: ");
@@ -236,10 +230,6 @@ public class Main {
         }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * testBlackNeighbours. You are free to modify and/or delete it.
-     */
     public static void testBlackNeighbours() {
         {
             System.out.print("testBlackNeighbours 1: ");
@@ -254,12 +244,47 @@ public class Main {
                 System.out.print("Computed: " + blackNeighbours);
             }
         }
+        {
+            System.out.print("testBlackNeighbours 2: ");
+            boolean[] neighbors = {false};
+            int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
+            int expected = 0;
+            if (blackNeighbours == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + blackNeighbours);
+            }
+        }
+        {
+            System.out.print("testBlackNeighbours 3: ");
+            boolean[] neighbors = {};
+            int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
+            int expected = 0;
+            if (blackNeighbours == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + blackNeighbours);
+            }
+        }
+        {
+            System.out.print("testBlackNeighbours 4: ");
+            boolean[] neighbors = {true, false, true, false, true, false, true, false};
+            int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
+            int expected = 4;
+            if (blackNeighbours == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + blackNeighbours);
+            }
+        }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * testTransitions. You are free to modify and/or delete it.
-     */
     public static void testTransitions() {
         {
             System.out.print("testTransitions 1: ");
@@ -287,12 +312,86 @@ public class Main {
                 System.out.print("Computed: " + transitions);
             }
         }
+        {
+            System.out.print("testTransitions 3: ");
+            boolean[] neighbours = {false, false, false, false, false};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 0;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
+            }
+        }
+        {
+            System.out.print("testTransitions 4: ");
+            boolean[] neighbours = {true, true, true, true, true};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 0;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
+            }
+        }
+        {
+            System.out.print("testTransitions 5: ");
+            boolean[] neighbours = {false};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 0;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
+            }
+        }
+        {
+            System.out.print("testTransitions 6: ");
+            boolean[] neighbours = {true};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 0;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
+            }
+        }
+        {
+            System.out.print("testTransitions 7: ");
+            boolean[] neighbours = {};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 0;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
+            }
+        }
+        {
+            System.out.print("testTransitions 8: ");
+            boolean[] neighbours = {true, false, true, false, true};
+            int transitions = Fingerprint.transitions(neighbours);
+            int expected = 2;
+            if (transitions == expected) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.println("Expected: " + expected);
+                System.out.println("Computed: " + transitions);
+            }
+        }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * testIdentical. You are free to modify and/or delete it.
-     */
     public static void testIdentical() {
         {
             System.out.print("testIdentical 1: ");
@@ -433,108 +532,103 @@ public class Main {
     }
 
     public static void testThinningStep() {
+        // TODO: add more test cases
         {
-            boolean[][] image = {{false, false, true, true},
+            System.out.print("test ThinningStep 1: ");
+            boolean[][] image = {
+                    {false, false, true, true},
                     {false, false, true, false},
                     {false, false, false, false},
-                    {false, false, false, false}};
-            boolean[][] expected = {{false, false, true, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = {
+                    {false, false, true, false},
                     {false, false, false, false},
                     {false, false, false, false},
-                    {false, false, false, false}};
-            boolean[][] thinninhStep = Fingerprint.thinningStep(image, 0);
-            boolean same = true;
-            for (int i = 0; i < thinninhStep.length; ++i) {
-                for (int j = 0; j < thinninhStep.length; ++j) {
-                    if (thinninhStep[i][j] != expected[i][j]) {
-                        same = false;
-                        break;
-                    }
-                }
-            }
-            if (same) {
-                System.out.println("test ThinningStep 1: OK");
-            } else {
-                System.out.println("test ThinningStep 1: ERROR");
+                    {false, false, false, false}
+            };
+            boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
+            if (Fingerprint.identical(thinningStep, expected))
+                System.out.println("OK");
+            else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + thinningStep);
             }
         }
         {
-            boolean[][] image = {{false, false, false, false},
+            System.out.print("test ThinningStep 2: ");
+            boolean[][] image = {
+                    {false, false, false, false},
                     {false, false, false, false},
                     {true, true, false, false},
-                    {true, false, true, false}};
-            boolean[][] expected = {{false, false, false, false},
+                    {true, false, true, false}
+            };
+            boolean[][] expected = {
+                    {false, false, false, false},
                     {false, false, false, false},
                     {true, true, false, false},
-                    {false, false, true, false}};
-            boolean[][] thinninhStep = Fingerprint.thinningStep(image, 0);
-            boolean same = true;
-            for (int i = 0; i < thinninhStep.length; ++i) {
-                for (int j = 0; j < thinninhStep.length; ++j) {
-                    if (thinninhStep[i][j] != expected[i][j]) {
-                        same = false;
-                        break;
-                    }
-                }
-            }
-            if (same) {
-                System.out.println("test ThinningStep 2: OK");
-            } else {
-                System.out.println("test ThinningStep 2: ERROR");
+                    {false, false, true, false}
+            };
+            boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
+            if (Fingerprint.identical(thinningStep, expected))
+                System.out.println("OK");
+            else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + thinningStep);
             }
         }
         {
-            boolean[][] image = {{false, false, false, false},
+            System.out.print("test ThinningStep 3: ");
+            boolean[][] image = {
+                    {false, false, false, false},
                     {false, false, false, false},
                     {true, true, false, false},
-                    {true, false, false, false}};
-            boolean[][] expected = {{false, false, false, false},
+                    {true, false, false, false}
+            };
+            boolean[][] expected = {
+                    {false, false, false, false},
                     {false, false, false, false},
                     {true, false, false, false},
-                    {false, false, false, false}};
+                    {false, false, false, false}
+            };
             boolean[][] thinningStep = Fingerprint.thinningStep(image, 1);
-            boolean same = true;
-            for (int i = 0; i < thinningStep.length; ++i) {
-                for (int j = 0; j < thinningStep.length; ++j) {
-                    if (thinningStep[i][j] != expected[i][j]) {
-                        same = false;
-                        break;
-                    }
-                }
-            }
-            if (same) {
-                System.out.println("test ThinningStep 3: OK");
-            } else {
-                System.out.println("test ThinningStep 3: ERROR");
+            if (Fingerprint.identical(thinningStep, expected))
+                System.out.println("OK");
+            else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + thinningStep);
             }
         }
-        boolean[][] image = {
-                {false, false, true, true},
-                {false, false, true, false},
-                {false, false, false, false},
-                {false, false, false, false}};
-        boolean[][] expected = {
-                {false, false, true, false},
-                {false, false, false, false},
-                {false, false, false, false},
-                {false, false, false, false}};
-        boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
-        boolean same = true;
-        for (int i = 0; i < image.length; ++i)
-            for (int j = 0; j < image.length; ++j)
-                if (image[i][j] != expected[i][j]) {
-                    same = false;
-                    break;
-                }
-        System.out.println();
-        System.out.println(same ? "test1 OK" : "test1 not OK");
+        {
+            System.out.print("test ThinningStep 4: ");
+            boolean[][] image = {
+                    {false, false, true, true},
+                    {false, false, true, false},
+                    {false, false, false, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = {
+                    {false, false, true, false},
+                    {false, false, false, false},
+                    {false, false, false, false},
+                    {false, false, false, false}
+            };
+            boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
+            if (Fingerprint.identical(thinningStep, expected))
+                System.out.println("OK");
+            else {
+                System.out.println("ERROR");
+                System.out.print("Expected: " + expected);
+                System.out.print("Computed: " + thinningStep);
+            }
+        }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * connectedPixels. You are free to modify and/or delete it.
-     */
     public static void testConnectedPixels() {
+        // TODO more tests
         {
             System.out.print("testConnectedPixels1: ");
             boolean[][] image = {
@@ -562,14 +656,17 @@ public class Main {
         }
         {
             System.out.print("testConnectedPixels2: ");
-            boolean[][] image = {{true, false, false, true},
+            boolean[][] image = {
+                    {true, false, false, true},
                     {false, false, true, true},
                     {false, true, true, false},
-                    {false, false, false, false}};
-            boolean[][] expected = {{false, false, false, false},
-                    {false, false, true, false},
-                    {false, true, true, false},
-                    {false, false, false, false}};
+                    {false, false, false, false}
+            };
+            boolean[][] expected = {
+                    {false, false, true},
+                    {false, true, true},
+                    {false, false, false}
+            };
             boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
@@ -583,14 +680,174 @@ public class Main {
         }
         {
             System.out.print("testConnectedPixels3: ");
-            boolean[][] image = {{true, false, false, true, true},
+            boolean[][] image = {
+                    {true, false, false, true, true},
                     {true, false, true, true, false},
                     {true, true, false, false, false},
-                    {false, true, false, true, false}};
-            boolean[][] expected = {{true, false, false, true, false},
+                    {false, true, false, true, false}
+            };
+            boolean[][] expected = {
+                    {true, false, false, true, false},
                     {true, false, true, true, false},
                     {true, true, false, false, false},
-                    {false, true, false, false, false}};
+                    {false, true, false, false, false}
+            };
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 2);
+            if (arrayEqual(connectedPixels, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(connectedPixels);
+            }
+        }
+    }
+
+    public static void testspreadPixel() {
+        // TODO more tests
+        {
+            System.out.print("testConnectedPixels1: ");
+            boolean[][] image = {
+                    {true, false, false, true},
+                    {false, false, true, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = new boolean[21][21];
+            expected[11][11] = true;
+            expected[11][12] = true;
+            expected[10][12] = true;
+            expected[10][13] = true;
+            expected[9][13] = true;
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
+            if (arrayEqual(connectedPixels, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(connectedPixels);
+            }
+        }
+        {
+            System.out.print("testConnectedPixels2: ");
+            boolean[][] image = {
+                    {true, false, false, true},
+                    {false, false, true, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = {
+                    {false, false, true},
+                    {false, true, true},
+                    {false, false, false}
+            };
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
+            if (arrayEqual(connectedPixels, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(connectedPixels);
+            }
+        }
+        {
+            System.out.print("testConnectedPixels3: ");
+            boolean[][] image = {
+                    {true, false, false, true, true},
+                    {true, false, true, true, false},
+                    {true, true, false, false, false},
+                    {false, true, false, true, false}
+            };
+            boolean[][] expected = {
+                    {true, false, false, true, false},
+                    {true, false, true, true, false},
+                    {true, true, false, false, false},
+                    {false, true, false, false, false}
+            };
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 2);
+            if (arrayEqual(connectedPixels, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(connectedPixels);
+            }
+        }
+    }
+
+    public static void testSubClone() {
+        // TODO more tests
+        {
+            System.out.print("testConnectedPixels1: ");
+            boolean[][] image = {
+                    {true, false, false, true},
+                    {false, false, true, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = new boolean[21][21];
+            expected[11][11] = true;
+            expected[11][12] = true;
+            expected[10][12] = true;
+            expected[10][13] = true;
+            expected[9][13] = true;
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
+            if (arrayEqual(connectedPixels, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(connectedPixels);
+            }
+        }
+        {
+            System.out.print("testConnectedPixels2: ");
+            boolean[][] image = {
+                    {true, false, false, true},
+                    {false, false, true, true},
+                    {false, true, true, false},
+                    {false, false, false, false}
+            };
+            boolean[][] expected = {
+                    {false, false, true},
+                    {false, true, true},
+                    {false, false, false}
+            };
+            boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
+            if (arrayEqual(connectedPixels, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(connectedPixels);
+            }
+        }
+        {
+            System.out.print("testConnectedPixels3: ");
+            boolean[][] image = {
+                    {true, false, false, true, true},
+                    {true, false, true, true, false},
+                    {true, true, false, false, false},
+                    {false, true, false, true, false}
+            };
+            boolean[][] expected = {
+                    {true, false, false, true, false},
+                    {true, false, true, true, false},
+                    {true, true, false, false, false},
+                    {false, true, false, false, false}
+            };
             boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 2);
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
@@ -667,6 +924,7 @@ public class Main {
     }
 
     public static void testComputeOrientation() {
+        // TODO more tests
         {
             boolean[][] image = {{false, false, false, true, false},
                     {false, false, true, true, false},
@@ -682,11 +940,8 @@ public class Main {
         }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * computeOrientation. You are free to modify and/or delete it.
-     */
     public static void testOrientation() {
+        // TODO more tests
         {
             boolean[][] image = {{true, false, false, true},
                     {false, false, true, true},
@@ -697,11 +952,8 @@ public class Main {
         }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * applyRotation. You are free to modify and/or delete it.
-     */
     public static void testApplyRotation() {
+        // TODO more tests
         {
             // minutia, centerRow, centerCol, rotation)
             int[] minutia = new int[]{1, 3, 10};
@@ -732,11 +984,8 @@ public class Main {
         }
     }
 
-    /**
-     * This function is here to help you test the functionalities of
-     * applyTranslation. You are free to modify and/or delete it.
-     */
     public static void testApplyTranslation() {
+        // TODO more tests
         {
             int[] result = Fingerprint.applyTranslation(new int[]{1, 3, 10}, 0, 0);
             System.out.println("Expected: 1,3,10");
@@ -763,6 +1012,7 @@ public class Main {
      * it.
      */
     public static void testThin() {
+        // TODO more tests
         {
             boolean[][] image1 = Helper.readBinary("resources/test_inputs/1_1_small.png");
             boolean[][] skeleton1 = Fingerprint.thin(image1);
@@ -859,14 +1109,13 @@ public class Main {
         }
     }
 
-    //
-    // UTIL
-    //
-    // NOT TESTS
-    //
 
     /*
      * Helper functions to print and compare arrays
+     *
+     * UTIL
+     *
+     * NOT TESTS
      */
     public static boolean arrayEqual(boolean[] array1, boolean[] array2) {
         if (array1 == null && array2 == null)
