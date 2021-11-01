@@ -78,13 +78,14 @@ public class Fingerprint {
         // check if pixel is in the image bounds
         if (row < 0 || row >= image.length || col < 0 || col >= image[0].length) return null;
 
+        // check which of the sides of the 3x3 around the pixel are inbounds
         boolean topRowInImage = (row > 0);
         boolean rightColumnInImage = (col < (image[0].length - 1)); // get length of an inner list
         boolean bottomRowInImage = (row < (image.length - 1));
         boolean leftColumnInImage = (col > 0);
 
-        // index operations are the difficult part
         // remember that positive y is down
+        // for each pixel: if it's inbounds and true, set the p-value to true
         boolean p0 = topRowInImage && image[row - 1][col];
         boolean p1 = topRowInImage && rightColumnInImage && image[row - 1][col + 1];
         boolean p2 = rightColumnInImage && image[row][col + 1];
@@ -107,10 +108,11 @@ public class Fingerprint {
      * @return the number of black/<code>true</code> neighbours.
      */
     public static int blackNeighbours(boolean[] neighbours) {
-        assert neighbours != null;
-        int ans = 0;
-        for (boolean i : neighbours) ans += i ? 1 : 0;
-        return ans;
+        assert neighbours != null; // assert there is something to get neighbours for
+        // accumulate how many neighbours are true
+        return IntStream.range(0, neighbours.length) // list of numbers from 0 to neighbours.length
+                .map(i -> neighbours[i] ? 1 : 0) // turn every i into a 1 if neighbours[i] is true and 0 if false
+                .sum(); // sum how many 1s there are in the list
     }
 
     /**
@@ -123,11 +125,11 @@ public class Fingerprint {
      * @return the number of white to black transitions.
      */
     public static int transitions(boolean[] neighbours) {
-        assert neighbours != null;
-        int ans = 0;
-        for (int i = 0; i < neighbours.length; i++)
-            ans += !neighbours[i] && neighbours[(i + 1) % neighbours.length] ? 1 : 0;
-        return ans;
+        assert neighbours != null; // make sure there are neighbours to search
+        return IntStream.range(0, neighbours.length) // list of numbers from 0 to neighbours.length
+                // turn every i into a 1 if it is false and the next one in the list is true
+                .map(i -> !neighbours[i] && neighbours[(i + 1) % neighbours.length] ? 1 : 0)
+                .sum(); // sum how many 1s there are in the list
     }
 
     /**
@@ -140,16 +142,14 @@ public class Fingerprint {
      */
     public static boolean identical(boolean[][] image1, boolean[][] image2) {
         // @formatter:off
-        return (image1 == null && image2 == null)
-                || (image1 != null
-                    && image2 != null
-                    && image1.length == image2.length
-                    && image1[0].length == image2[0].length
-                    && IntStream
-                        .range(0, image1.length)
-                        .noneMatch(i -> IntStream
-                                .range(0, image1[0].length)
-                                .anyMatch(j -> image1[i][j] != image2[i][j])));
+        return (image1 == null && image2 == null) // if both are null they are the same
+                || ((image1 != null && image2 != null) // if one is null and the other isn't, return false
+                    && image1.length == image2.length // they have to be the same length
+                    && image1[0].length == image2[0].length // in both dimensions
+                    && IntStream.range(0, image1.length) // list of numbers from 0 to the length of image1
+                        .noneMatch( // make sure that all rows have no differing pixels
+                                i -> IntStream.range(0, image1[0].length) // from 0 to the length of image1[0]
+                                .anyMatch(j -> image1[i][j] != image2[i][j]))); // if any pixels are different -> true
         // @formatter:on
     }
 
@@ -161,12 +161,12 @@ public class Fingerprint {
      * applying the thinning algorithm.
      */
     public static boolean[][] thin(boolean[][] image) {
-        boolean[][] previous = new boolean[image.length][image[0].length];
+        boolean[][] previous = new boolean[image.length][image[0].length]; // define the dimensions of the image
         do {
-            for (int i = 0; i < image.length; ++i)
+            for (int i = 0; i < image.length; ++i) // copy every row of image into previous
                 System.arraycopy(image[i], 0, previous[i], 0, image[i].length);
-            image = thinningStep(thinningStep(image, 0), 1);
-        } while (!identical(previous, image));
+            image = thinningStep(thinningStep(image, 0), 1); // run both thinning steps
+        } while (!identical(previous, image)); // repeat if there was a change
         return image;
     }
 
@@ -179,12 +179,12 @@ public class Fingerprint {
      */
     public static boolean[][] thinningStep(boolean[][] image, int step) {
         boolean[][] newImage = new boolean[image.length][image[0].length];
-        for (int i = 0; i < image.length; ++i)
+        for (int i = 0; i < image.length; ++i) // for every pixel
             for (int j = 0; j < image[i].length; ++j) {
-                boolean[] neighbours = getNeighbours(image, i, j); // simplifies the logic below, and only calls getNeighbours once
+                boolean[] neighbours = getNeighbours(image, i, j); // simplifies the logic below
                 // @formatter:off
                 newImage[i][j] = image[i][j] // if the pixel is black it stays black (image[i][j] && ...) == false
-                        && !(neighbours != null // !(...) because it is false if the below conditions are true
+                        && !(neighbours != null // if all the below is true the pixel should be false -> !(...)
                             && blackNeighbours(neighbours) > 1
                             && blackNeighbours(neighbours) < 7
                             && transitions(neighbours) == 1
@@ -215,32 +215,34 @@ public class Fingerprint {
         int squareSideLength = 2 * distance + 1;
         int topLeftCornerXCoordinate = col - distance;
         int topLeftCornerYCoordinate = row - distance;
+        // create a square clone of a subset of the image centered on the pixel and squareSideLength wide
         boolean[][] clone = subClone(image, topLeftCornerYCoordinate, topLeftCornerXCoordinate, squareSideLength);
 
         boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
+        // set an empty array with the same center pixel as in clone
         relevant[distance][distance] = image[row][col];
-        while (true) {
-            boolean[][] previousArray = ArrayCloneSquare(relevant, squareSideLength);
-            for (int i = 0; i < squareSideLength; i++)
+        boolean[][] previousArray; // variable to remember what relevant looked like
+        do {
+            previousArray = ArrayCloneSquare(relevant, squareSideLength); // clone relevant to remember it
+            for (int i = 0; i < squareSideLength; i++) // for each pixel
                 for (int j = 0; j < squareSideLength; j++)
-                    spreadPixel(clone, relevant, i, j); // make every pixel "infect" its neighbours
-            if (identical(previousArray, relevant)) break;
-        }
+                    spreadPixel(clone, relevant, i, j); // make every pixel "infect" its true neighbours if it is true
+        } while (!identical(previousArray, relevant)); // repeat if there was a change
         return relevant;
     }
 
     static boolean[][] ArrayCloneSquare(boolean[][] image, int width) {
-        return subClone(image, 0, 0, width);
+        return subClone(image, 0, 0, width); // preset to clone a square array
     }
 
     static boolean[][] subClone(boolean[][] image, int topLeftRow, int topLeftCol, int width) {
         boolean[][] clone = new boolean[width][width];
-        for (int i = 0; i < width; i++)
+        for (int i = 0; i < width; i++) // for every pixel
             for (int j = 0; j < width; j++) {
-                int row = topLeftRow + i;
+                int row = topLeftRow + i; // shift over by the top left coordinate of the sub square
                 int col = topLeftCol + j;
                 if (row >= 0 && row < image.length && col >= 0 && col < image[0].length)
-                    clone[i][j] = image[row][col];
+                    clone[i][j] = image[row][col]; // copy it
             }
         return clone;
     }
@@ -250,11 +252,15 @@ public class Fingerprint {
         if (row < 0 || row >= imageSubset.length || col < 0 || col >= imageSubset[0].length) return;
         if (!subsetClone[row][col]) return; // if the pixel is false it doesn't spread
 
+        // check which of the sides of the 3x3 around the pixel are inbounds
         boolean topRowInImage = (row > 0);
         boolean rightColumnInImage = (col < (imageSubset[0].length - 1));
         boolean bottomRowInImage = (row < (imageSubset.length - 1));
         boolean leftColumnInImage = (col > 0);
 
+        // for each pixel: if it's inbounds and true in the original image, make it true
+        // if statements instead of ternary operators (as in getNeighbours) because the subsetClone
+        // indexes also have to be inbounds
         if (topRowInImage) subsetClone[row - 1][col] = imageSubset[row - 1][col];
         if (topRowInImage && rightColumnInImage) subsetClone[row - 1][col + 1] = imageSubset[row - 1][col + 1];
         if (rightColumnInImage) subsetClone[row][col + 1] = imageSubset[row][col + 1];
@@ -263,6 +269,7 @@ public class Fingerprint {
         if (bottomRowInImage && leftColumnInImage) subsetClone[row + 1][col - 1] = imageSubset[row + 1][col - 1];
         if (leftColumnInImage) subsetClone[row][col - 1] = imageSubset[row][col - 1];
         if (leftColumnInImage && topRowInImage) subsetClone[row - 1][col - 1] = imageSubset[row - 1][col - 1];
+        // it changed the pixels in place so no return
     }
 
     /**
@@ -353,15 +360,7 @@ public class Fingerprint {
      * @return The orientation in degrees.
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
-        // TODO test when getNeighbours is correct
-        //boolean[][] connectedPixels = connectedPixels(image, row, col, distance);
-        // uncomment below to test computeOrientation even if connectedPixels doesn't work
-        boolean[][] connectedPixels = {
-                {false, false, false, true, false},
-                {false, false, true, true, false},
-                {false, true, true, false, false},
-                {false, false, false, false, false}
-        };
+        boolean[][] connectedPixels = connectedPixels(image, row, col, distance);
         double slope = computeSlope(connectedPixels, row, col);
         double angle = computeAngle(connectedPixels, row, col, slope);
         int angleDegrees = (int) Math.round(Math.toDegrees(angle));
