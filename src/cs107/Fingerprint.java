@@ -288,28 +288,26 @@ public class Fingerprint {
         for (int i = 0; i < connectedPixels.length; i++) // for each pixel
             for (int j = 0; j < connectedPixels[0].length; j++)
                 if (connectedPixels[i][j] && !(i == row && j == col)) { // if it's true and not the origin
-                    int x = j - col;
+                    int x = j - col; // make its coordinates relative to the new origin
                     int y = row - i;
-                    xValues.add(x);
+                    xValues.add(x); // add it to the list
                     yValues.add(y);
                 }
 
-        double xySum = IntStream.range(0, xValues.size())
-                .mapToDouble(i->xValues.get(i) * yValues.get(i))
-                .sum();
-        double xSquared = xValues.stream()
-                .mapToDouble(i -> i * i)
-                .sum();
-        double ySquared = yValues.stream()
-                .mapToDouble(i -> i * i)
-                .sum();
+        double xySum = IntStream
+                .range(0, xValues.size()) // for each index of xValues
+                .mapToDouble(i -> xValues.get(i) * yValues.get(i)) // multiply it with its equivalent in yValues
+                .sum(); // sum them up
+        double xSquared = xValues.stream() // for each value of xValues
+                .mapToDouble(i -> i * i) // square it
+                .sum(); // sum the squares
+        double ySquared = yValues.stream() // for each value of yValues
+                .mapToDouble(i -> i * i) // square it
+                .sum(); // sum the squares
 
-        double slope;
-        if (xSquared != 0)
-            if (xSquared >= ySquared) slope = xySum / xSquared;
-            else slope = ySquared / xySum;
-        else slope = Double.POSITIVE_INFINITY;
-        return slope;
+        if (xSquared == 0) return Double.POSITIVE_INFINITY; // if vertical return infinity
+        if (xSquared >= ySquared) return xySum / xSquared;
+        else return ySquared / xySum;
     }
 
     /**
@@ -327,23 +325,21 @@ public class Fingerprint {
         int pixelsAbove = 0;
         int pixelsUnder = 0;
 
-        for (int i = 0; i < connectedPixels.length; i++)
+        for (int i = 0; i < connectedPixels.length; i++) // for each pixel
             for (int j = 0; j < connectedPixels[i].length; j++)
-                if (connectedPixels[i][j]
-                        && !(i == row && j == col)) {
-                    int x = j - col;
+                if (connectedPixels[i][j] && !(i == row && j == col)) { // if it's not the origin and it's true
+                    int x = j - col; // make its coordinates relative to the new origin
                     int y = row - i;
-                    if (y >= -1 / slope * x) ++pixelsAbove;
-                    else ++pixelsUnder;
+                    if (y >= -1 / slope * x) pixelsAbove++; // if it's above the normal increment pixelsAbove
+                    else pixelsUnder++; // if not increment pixels below
                 }
 
-        double angle;
-        if (slope != Double.POSITIVE_INFINITY) {
-            angle = Math.atan(slope);
-            if ((angle > 0 && pixelsUnder > pixelsAbove)
-                    || (angle < 0 && pixelsUnder < pixelsAbove))
-                angle += Math.PI;
-        } else angle = (pixelsAbove > pixelsUnder ? Math.PI : -Math.PI) / 2;
+        if (slope == Double.POSITIVE_INFINITY) // if the line is vertical
+            return (pixelsAbove > pixelsUnder ? Math.PI : -Math.PI) / 2; // return either up or down
+        double angle = Math.atan(slope);
+        if ((angle > 0 && pixelsUnder > pixelsAbove) // if it's going up and there are more under the line than not
+                || (angle < 0 && pixelsUnder < pixelsAbove)) // or going down and more over than under
+            angle += Math.PI; // flip the angle
         return angle;
     }
 
