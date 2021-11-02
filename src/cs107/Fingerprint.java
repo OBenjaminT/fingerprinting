@@ -282,33 +282,32 @@ public class Fingerprint {
      * @return the slope.
      */
     public static double computeSlope(boolean[][] connectedPixels, int row, int col) {
-        ArrayList<Integer> xValues = new ArrayList<>();
-        ArrayList<Integer> yValues = new ArrayList<>();
+        var xValues = new ArrayList<Integer>();
+        var yValues = new ArrayList<Integer>();
 
-        for (int i = 0; i < connectedPixels.length; i++)
-            for (int j = 0; j < connectedPixels[i].length; j++)
-                if (connectedPixels[i][j] && !(i == row && j == col)) {
+        for (int i = 0; i < connectedPixels.length; i++) // for each pixel
+            for (int j = 0; j < connectedPixels[0].length; j++)
+                if (connectedPixels[i][j] && !(i == row && j == col)) { // if it's true and not the origin
                     int x = j - col;
                     int y = row - i;
                     xValues.add(x);
                     yValues.add(y);
                 }
 
-        double xSquared = 0;
-        double ySquared = 0;
-        double xy = 0;
-        for (int i = 0; i < xValues.size(); i++) {
-            double xi = xValues.get(i);
-            double yi = yValues.get(i);
-            xSquared += xi * xi;
-            ySquared += yi * yi;
-            xy += xi * yi;
-        }
+        double xySum = IntStream.range(0, xValues.size())
+                .mapToDouble(i->xValues.get(i) * yValues.get(i))
+                .sum();
+        double xSquared = xValues.stream()
+                .mapToDouble(i -> i * i)
+                .sum();
+        double ySquared = yValues.stream()
+                .mapToDouble(i -> i * i)
+                .sum();
 
         double slope;
         if (xSquared != 0)
-            if (xSquared >= ySquared) slope = xy / xSquared;
-            else slope = ySquared / xy;
+            if (xSquared >= ySquared) slope = xySum / xSquared;
+            else slope = ySquared / xySum;
         else slope = Double.POSITIVE_INFINITY;
         return slope;
     }
