@@ -378,13 +378,15 @@ public class Fingerprint {
         var thinImage = thin(image); // thin the image
         for (int i = 1; i < thinImage.length - 1; i++) // for each pixel excluding the outer edge
             for (int j = 1; j < thinImage[i].length - 1; j++) {
-                var neighbors = getNeighbours(thinImage, i, j);
-                assert neighbors != null;
-                var transitions = transitions(neighbors);
-                if (transitions == 3 || transitions == 1) { // if it's a minutia
-                    minutia = new int[]{i, j, computeOrientation(thinImage, i, j, ORIENTATION_DISTANCE)};
-                    minutiaes.add(minutia); // add it to the list
-                }
+                //if (thinImage[i][j]) {
+                    var neighbors = getNeighbours(thinImage, i, j);
+                    assert neighbors != null;
+                    var transitions = transitions(neighbors);
+                    if (transitions == 3 || transitions == 1) { // if it's a minutia
+                        minutia = new int[]{i, j, computeOrientation(thinImage, i, j, ORIENTATION_DISTANCE)};
+                        minutiaes.add(minutia); // add it to the list
+                    }
+                //}
             }
         return minutiaes;
     }
