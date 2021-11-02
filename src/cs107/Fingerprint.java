@@ -487,23 +487,11 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        int matches = 0;
-        for(int[] m1 : minutiae1 ){
-            int j =0;
-            //this boolean makes sure that m doesn't match with more than one minutiae from minutiae2
-            boolean notfound = true;
-            while(j<minutiae2.size() && notfound){
-                int[]m2 = minutiae2.get(j);
-                boolean distance = Math.sqrt((m1[0]-m2[0])*(m1[0]-m2[0])-(m1[1]-m2[1])*(m1[1]-m2[1]))<=maxDistance;
-                boolean orientation =Math.abs(m1[2]-m2[2])<=maxOrientation;
-                if(distance && orientation){
-                    ++matches;
-                    notfound = false;
-                }
-                ++j;
-            }
-        }
-        return matches;
+        return (int) minutiae1.stream() // for each minutia in minutiae1
+                .filter(i -> minutiae2.stream().anyMatch(j -> // keep it if there is any in minutiae2 that is true below
+                        Math.sqrt((i[0]-j[0]) * (i[0]-j[0]) - (i[1]-j[1]) * (i[1]-j[1])) <= maxDistance
+                                && Math.abs(i[2] - j[2]) <= maxOrientation))
+                .count(); // count how many were kept
     }
 
     /**
