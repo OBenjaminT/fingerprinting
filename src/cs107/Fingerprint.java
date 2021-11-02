@@ -7,6 +7,7 @@ package cs107;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
@@ -355,12 +356,11 @@ public class Fingerprint {
      * @return The orientation in degrees.
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
-        boolean[][] connectedPixels = connectedPixels(image, row, col, distance);
-        double slope = computeSlope(connectedPixels, row, col);
-        double angle = computeAngle(connectedPixels, row, col, slope);
-        int angleDegrees = (int) Math.round(Math.toDegrees(angle));
-        if (angleDegrees < 0) angleDegrees += 360;
-        return angleDegrees;
+        var connectedPixels = connectedPixels(image, row, col, distance);
+        var slope = computeSlope(connectedPixels, row, col);
+        var angle = computeAngle(connectedPixels, row, col, slope);
+        var angleDegrees = (int) Math.round(Math.toDegrees(angle));
+        return angleDegrees < 0 ? angleDegrees + 360 : angleDegrees;
     }
 
     /**
@@ -373,23 +373,19 @@ public class Fingerprint {
      * @see #thin(boolean[][])
      */
     public static List<int[]> extract(boolean[][] image) {
-        //TODO please check this code, because I never used lists in java before
-        ArrayList<int[]> minutiaes = new ArrayList<>();
-        int[] minutia = new int[3];
-        image = thin(image);
-        for (int i = 1; i < image.length - 1; i++)
-            for (int j = 1; j < image[i].length - 1; j++)
-                if (image[i][j]) {
-                    boolean[] neighbors = getNeighbours(image, i, j);
-                    assert neighbors != null;
-                    int transitions = transitions(neighbors);
-                    if (transitions == 1 || transitions == 3) {
-                        minutia[0] = i;
-                        minutia[1] = j;
-                        minutia[2] = computeOrientation(image, i, j, ORIENTATION_DISTANCE);
-                        minutiaes.add(minutia);
-                    }
+        var minutiaes = new ArrayList<int[]>();
+        var minutia = new int[3];
+        var thinImage = thin(image); // thin the image
+        for (int i = 1; i < thinImage.length - 1; i++) // for each pixel excluding the outer edge
+            for (int j = 1; j < thinImage[i].length - 1; j++) {
+                var neighbors = getNeighbours(thinImage, i, j);
+                assert neighbors != null;
+                var transitions = transitions(neighbors);
+                if (transitions == 3 || transitions == 1) { // if it's a minutia
+                    minutia = new int[]{i, j, computeOrientation(thinImage, i, j, ORIENTATION_DISTANCE)};
+                    minutiaes.add(minutia); // add it to the list
                 }
+            }
         return minutiaes;
     }
 
@@ -403,14 +399,16 @@ public class Fingerprint {
      * @return the minutia rotated around the given center.
      */
     public static int[] applyRotation(int[] minutia, int centerRow, int centerCol, int rotation) {
+        // center on new origin
         int x = minutia[1] - centerCol;
         int y = centerRow - minutia[0];
-        double pi_180 = Math.PI / 180;
-        double sinRot = Math.sin(rotation * pi_180);
-        double cosRot = Math.cos(rotation * pi_180);
-
-        int newRow = centerRow - (int) Math.round(x * sinRot + y * cosRot);
-        int newCol = (int) Math.round(x * cosRot - y * sinRot) + centerCol;
+        // convert to radians, then compute sin/cos
+        double rotationRad = Math.toRadians(rotation);
+        double sinRot = Math.sin(rotationRad);
+        double cosRot = Math.cos(rotationRad);
+        // formula
+        int newRow = (int) Math.round(centerRow - x * sinRot + y * cosRot);
+        int newCol = (int) Math.round(centerCol + x * cosRot - y * sinRot);
         int newOrientation = (minutia[2] + rotation) % 360;
         return new int[]{newRow, newCol, newOrientation};
     }
@@ -447,7 +445,7 @@ public class Fingerprint {
                                             int rowTranslation,
                                             int colTranslation,
                                             int rotation) {
-        int[] translatedMinutiae = applyRotation(minutia, centerRow, centerCol, rotation);
+        var translatedMinutiae = applyRotation(minutia, centerRow, centerCol, rotation);
         return applyTranslation(translatedMinutiae, rowTranslation, colTranslation);
     }
 
@@ -469,11 +467,9 @@ public class Fingerprint {
                                                   int rowTranslation,
                                                   int colTranslation,
                                                   int rotation) {
-        for (int i = 0; i < minutiae.size(); i++) {
-            int[] rotatedTranslatedMinutiae = applyTransformation(minutiae.get(i), centerRow, centerCol, rowTranslation, colTranslation, rotation);
-            minutiae.add(rotatedTranslatedMinutiae);
-        }
-        return minutiae;
+        return minutiae.stream() // for each minutia transform it
+                .map(i -> applyTransformation(i, centerRow, centerCol, rowTranslation, colTranslation, rotation))
+                .collect(Collectors.toList()); // convert to a list again
     }
 
     /**
