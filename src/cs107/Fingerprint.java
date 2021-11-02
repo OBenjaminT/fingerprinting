@@ -489,7 +489,7 @@ public class Fingerprint {
                                             int maxOrientation) {
         return (int) minutiae1.stream() // for each minutia in minutiae1
                 .filter(i -> minutiae2.stream().anyMatch(j -> // keep it if there is any in minutiae2 that is true below
-                        Math.sqrt((i[0]-j[0]) * (i[0]-j[0]) - (i[1]-j[1]) * (i[1]-j[1])) <= maxDistance
+                        Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) - (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
                                 && Math.abs(i[2] - j[2]) <= maxOrientation))
                 .count(); // count how many were kept
     }
@@ -503,7 +503,20 @@ public class Fingerprint {
      * otherwise.
      */
     public static boolean match(List<int[]> minutiae1, List<int[]> minutiae2) {
-        //TODO implement
-        return false;
+        return minutiae1.stream() // for all minutia1
+                .anyMatch(min1 -> minutiae2.stream() // is there any in minutia2 where
+                        .anyMatch(min2 -> IntStream // in the angle_offset range
+                                .rangeClosed(min2[2] - min1[2] - MATCH_ANGLE_OFFSET,
+                                        min2[2] - min1[2] + MATCH_ANGLE_OFFSET)
+                                .anyMatch(rotation -> // the matching minutiaeCount is or the transformation is > threshold
+                                        matchingMinutiaeCount(minutiae1,
+                                                applyTransformation(minutiae2,
+                                                        min2[0], min2[1],
+                                                        min2[0] - min1[0],
+                                                        min2[1] - min1[1],
+                                                        rotation),
+                                                DISTANCE_THRESHOLD,
+                                                ORIENTATION_THRESHOLD)
+                                                >= FOUND_THRESHOLD)));
     }
 }
