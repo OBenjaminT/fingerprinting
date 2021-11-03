@@ -19,7 +19,7 @@ public class Main {
         //---------------------------
         // Tests functions separately
         //---------------------------
-        /*
+
         // Tested and Passing
         testGetNeighbours();
         testBlackNeighbours();
@@ -39,7 +39,7 @@ public class Main {
         testApplyRotation();
         testApplyTranslation();
 
-
+        /*
         // buggy test?
         //testExtract();
 
