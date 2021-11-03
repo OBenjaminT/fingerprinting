@@ -3,6 +3,7 @@ package cs107;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * This class will not be graded. You can use it to test your program.
@@ -31,38 +32,34 @@ public class Main {
         testmatchingMinutiaeCount();
 
         // passing but more tests
+        testThin();
         testComputeSlope();
         testComputeAngle();
-        testThin();
         testComputeOrientation();
+        testApplyRotation();
+        testApplyTranslation();
 
+
+        // buggy test?
         //testExtract();
 
         // TODO test thinning steps 1 and 2
 
-        // Un-tested
-        /*
-        testApplyRotation();
-        testApplyTranslation();
-        */
 
-        /*
-        testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
-        testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
-        testDrawSkeleton("2_1"); //draw skeleton of fingerprint 2_1.png
+        //testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
+        //testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
+        //testDrawSkeleton("2_1"); //draw skeleton of fingerprint 2_1.png
 
-        testDrawMinutiae("1_1"); //draw minutiae of fingerprint 1_1.png
-        testDrawMinutiae("1_2"); //draw minutiae of fingerprint 1_2.png
-        testDrawMinutiae("2_1"); //draw minutiae of fingerprint 2_1.png
+        //testDrawMinutiae("1_1"); //draw minutiae of fingerprint 1_1.png
+        //testDrawMinutiae("1_2"); //draw minutiae of fingerprint 1_2.png
+        //testDrawMinutiae("2_1"); //draw minutiae of fingerprint 2_1.png
 
-        testWithSkeleton();
+        //testWithSkeleton();
         //---------------------------
         // Test overall functionality
         //---------------------------
         // compare 1_1.png with 1_2.png: they are supposed to match
-
         testCompareFingerprints("1_1", "1_2", true);  //expected match: true
-
 
         // compare 1_1.png with 2_1.png: they are not supposed to match
         testCompareFingerprints("1_1", "2_1", false); //expected match: false
@@ -74,10 +71,8 @@ public class Main {
         testCompareAllFingerprints("1_1", 2, false);
 
         // compare 1_1 with all images of finger 3 to 16
-        for (int f = 3; f <= 16; f++) {
-            testCompareAllFingerprints("1_1", f, false);
-        }
-         */
+        IntStream.range(3, 17).parallel()
+                .forEach(f -> testCompareAllFingerprints("1_1", f, false));
     }
 
     public static void testGetNeighbours() {
@@ -922,7 +917,6 @@ public class Main {
     }
 
     public static void testExtract() {
-        //TODO improve test, this one is temporary until getConnectedPixels works
         {
             System.out.print("test Extract 1: ");
             boolean[][] image = {
@@ -933,11 +927,11 @@ public class Main {
             };
             double slope = Fingerprint.computeSlope(image, 2, 1);
             double angle = Fingerprint.computeAngle(image, 2, 1, slope);
-            int angleDegrees = (int) Math.round(Math.toDegrees(angle));
-            boolean same = true;
-            List<int[]> minutiaes = Fingerprint.extract(image);
-            List<int[]> expected = new ArrayList<int[]>();
+            var angleDegrees = (int) Math.round(Math.toDegrees(angle));
+            var expected = new ArrayList<int[]>();
             expected.add(new int[]{2, 1, 270});
+
+            var minutiaes = Fingerprint.extract(image);
 
             if (minutiaes.equals(expected)) {
                 System.out.println("OK");
@@ -976,49 +970,112 @@ public class Main {
 
     public static void testApplyRotation() {
         // TODO more tests
+        var minutia = new int[]{1, 3, 10};
+        int[] result;
         {
             // minutia, centerRow, centerCol, rotation)
-            int[] minutia = new int[]{1, 3, 10};
-            int[] result = Fingerprint.applyRotation(minutia, 0, 0, 0);
-            System.out.println("Expected: 1,3,10");
-            System.out.print("Computed: ");
-            printArray(result);
-
+            result = Fingerprint.applyRotation(minutia, 0, 0, 0);
+            var expected = new int[]{1, 3, 10};
+            System.out.print("test applyRotation 1: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
+        }
+        {
             result = Fingerprint.applyRotation(minutia, 10, 5, 0);
-            System.out.println("Expected: 1,3,10");
-            System.out.print("Computed: ");
-            printArray(result);
-
+            var expected = new int[]{1, 3, 10};
+            System.out.print("test applyRotation 2: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
+        }
+        {
             result = Fingerprint.applyRotation(minutia, 0, 0, 90);
-            System.out.println("Expected: -3,1,100");
-            System.out.print("Computed: ");
-            printArray(result);
-
+            var expected = new int[]{-3, 1, 100};
+            System.out.print("test applyRotation 3: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
+        }
+        {
             result = Fingerprint.applyRotation(new int[]{0, 3, 10}, 0, 0, 90);
-            System.out.println("Expected: -3,0,100");
-            System.out.print("Computed: ");
-            printArray(result);
-
+            var expected = new int[]{-3, 0, 100};
+            System.out.print("test applyRotation 4: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
+        }
+        {
             result = Fingerprint.applyRotation(new int[]{3, 0, 10}, 0, 0, 90);
-            System.out.println("Expected: 0,3,100");
-            System.out.print("Computed: ");
-            printArray(result);
+            var expected = new int[]{0, 3, 100};
+            System.out.print("test applyRotation 5: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
         }
     }
 
     public static void testApplyTranslation() {
         // TODO more tests
+        var minutia = new int[]{1, 3, 10};
+        int[] result;
         {
-            int[] result = Fingerprint.applyTranslation(new int[]{1, 3, 10}, 0, 0);
-            System.out.println("Expected: 1,3,10");
-            System.out.print("Computed: ");
-            printArray(result);
+            result = Fingerprint.applyTranslation(minutia, 0, 0);
+            var expected = new int[]{1, 3, 10};
+            System.out.print("test applyTranslation 1: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
         }
         {
-            int[] result = Fingerprint.applyTranslation(new int[]{1, 3, 10}, 10, 5);
-            System.out.println("Expected: -9,-2,10");
-            System.out.print("Computed: ");
-            printArray(result);
+            result = Fingerprint.applyTranslation(minutia, 10, 5);
+            var expected = new int[]{-9, -2, 10};
+            System.out.print("test applyTranslation 2: ");
+            if (Arrays.equals(result, expected)) {
+                System.out.println("OK");
+            } else {
+                System.out.println("ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(result);
+            }
         }
     }
 
@@ -1085,11 +1142,53 @@ public class Main {
                 printArray(skeleton1);
             }
         }
+        {
+            boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/1_1.png");
+            boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_1.png");
+            boolean[][] skeleton1 = Fingerprint.thin(image1);
+            if (Fingerprint.identical(expected, skeleton1)) {
+                System.out.println("test thin 2: OK");
+            } else {
+                System.out.println("test thin 2: ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(skeleton1);
+            }
+        }
+        {
+            boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/1_2.png");
+            boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_2.png");
+            boolean[][] skeleton1 = Fingerprint.thin(image1);
+            if (Fingerprint.identical(expected, skeleton1)) {
+                System.out.println("test thin 3: OK");
+            } else {
+                System.out.println("test thin 3: ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(skeleton1);
+            }
+        }
+        {
+            boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/2_1.png");
+            boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_2_1.png");
+            boolean[][] skeleton1 = Fingerprint.thin(image1);
+            if (Fingerprint.identical(expected, skeleton1)) {
+                System.out.println("test thin 4: OK");
+            } else {
+                System.out.println("test thin 4: ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(skeleton1);
+            }
+        }
     }
 
     public static void testDrawSkeleton(String name) {
         {
-            boolean[][] image1 = Helper.readBinary("resources/fingerprints/" + name + ".png");
+            boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name + ".png");
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             Helper.writeBinary("skeleton_" + name + ".png", skeleton1);
         }
@@ -1097,7 +1196,7 @@ public class Main {
 
     public static void testDrawMinutiae(String name) {
         {
-            boolean[][] image1 = Helper.readBinary("resources/fingerprints/" + name + ".png");
+            boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name + ".png");
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             List<int[]> minutia1 = Fingerprint.extract(skeleton1);
             int[][] colorImageSkeleton1 = Helper.fromBinary(skeleton1);
@@ -1115,7 +1214,7 @@ public class Main {
      */
     public static void testWithSkeleton() {
         {
-            boolean[][] skeleton1 = Helper.readBinary("resources/test_inputs/skeletonTest.png");
+            boolean[][] skeleton1 = Helper.readBinary("src/resources/test_inputs/skeletonTest.png");
             List<int[]> minutiae1 = Fingerprint.extract(skeleton1);
             List<int[]> expected = new ArrayList<>();
             expected.add(new int[]{39, 21, 264});
@@ -1139,7 +1238,7 @@ public class Main {
      * file name2.png. The third parameter indicates if we expected a match or not.
      */
     public static void testCompareFingerprints(String name1, String name2, boolean expectedResult) {
-        boolean[][] image1 = Helper.readBinary("resources/fingerprints/" + name1 + ".png");
+        boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name1 + ".png");
         // Helper.show(Helper.fromBinary(image1), "Image1");
         boolean[][] skeleton1 = Fingerprint.thin(image1);
         //Helper.writeBinary("skeleton_" + name1 + ".png", skeleton1);
@@ -1150,7 +1249,7 @@ public class Main {
         //Helper.drawMinutia(colorImageSkeleton1, minutiae1);
         //Helper.writeARGB("./minutiae_" + name1 + ".png", colorImageSkeleton1);
 
-        boolean[][] image2 = Helper.readBinary("resources/fingerprints/" + name2 + ".png");
+        boolean[][] image2 = Helper.readBinary("src/resources/fingerprints/" + name2 + ".png");
         boolean[][] skeleton2 = Fingerprint.thin(image2);
         List<int[]> minutiae2 = Fingerprint.extract(skeleton2);
 
@@ -1159,9 +1258,15 @@ public class Main {
         //Helper.writeARGB("./minutiae_" + name2 + ".png", colorImageSkeleton2);
 
         boolean isMatch = Fingerprint.match(minutiae1, minutiae2);
-        System.out.print("Compare " + name1 + " with " + name2);
-        System.out.print(". Expected match: " + expectedResult);
-        System.out.println(" Computed match: " + isMatch);
+        var result = new StringBuilder();
+        result.append("Compare " + name1 + " with " + name2);
+        if (isMatch == expectedResult)
+            result.append(". OK!");
+        else {
+            result.append(". Expected match: " + expectedResult);
+            result.append(" Computed match: " + isMatch);
+        }
+        System.out.println(result);
     }
 
     /**
@@ -1171,9 +1276,8 @@ public class Main {
      * The third parameter indicates if we expected a match or not.
      */
     public static void testCompareAllFingerprints(String name1, int finger, boolean expectedResult) {
-        for (int i = 1; i <= 8; i++) {
-            testCompareFingerprints(name1, finger + "_" + i, expectedResult);
-        }
+        IntStream.range(1, 9).parallel()
+                .forEach(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult));
     }
 
 

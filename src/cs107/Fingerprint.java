@@ -147,9 +147,9 @@ public class Fingerprint {
                 || ((image1 != null && image2 != null) // if one is null and the other isn't, return false
                     && image1.length == image2.length // they have to be the same length
                     && image1[0].length == image2[0].length // in both dimensions
-                    && IntStream.range(0, image1.length) // list of numbers from 0 to the length of image1
+                    && IntStream.range(0, image1.length).parallel() // list of numbers from 0 to the length of image1
                         .noneMatch( // make sure that all rows have no differing pixels
-                                i -> IntStream.range(0, image1[0].length) // from 0 to the length of image1[0]
+                                i -> IntStream.range(0, image1[0].length)//.parallel() // from 0 to the length of image1[0]
                                 .anyMatch(j -> image1[i][j] != image2[i][j]))); // if any pixels are different -> true
         // @formatter:on
     }
@@ -296,13 +296,13 @@ public class Fingerprint {
                 }
 
         double xySum = IntStream
-                .range(0, xValues.size()) // for each index of xValues
+                .range(0, xValues.size())//.parallel() // for each index of xValues
                 .mapToDouble(i -> xValues.get(i) * yValues.get(i)) // multiply it with its equivalent in yValues
                 .sum(); // sum them up
-        double xSquared = xValues.stream() // for each value of xValues
+        double xSquared = xValues.stream()//.parallel() // for each value of xValues
                 .mapToDouble(i -> i * i) // square it
                 .sum(); // sum the squares
-        double ySquared = yValues.stream() // for each value of yValues
+        double ySquared = yValues.stream()//.parallel() // for each value of yValues
                 .mapToDouble(i -> i * i) // square it
                 .sum(); // sum the squares
 
@@ -377,7 +377,7 @@ public class Fingerprint {
         var minutia = new int[3];
         var thinImage = thin(image); // thin the image
         for (int i = 1; i < thinImage.length - 1; i++) // for each pixel excluding the outer edge
-            for (int j = 1; j < thinImage[i].length - 1; j++) {
+            for (int j = 1; j < thinImage[i].length - 1; j++)
                 if (thinImage[i][j]) { // if it's part of the fingerprint
                     var neighbors = getNeighbours(thinImage, i, j);
                     assert neighbors != null;
@@ -387,7 +387,6 @@ public class Fingerprint {
                         minutiaes.add(minutia); // add it to the list
                     }
                 }
-            }
         return minutiaes;
     }
 
@@ -409,7 +408,7 @@ public class Fingerprint {
         double sinRot = Math.sin(rotationRad);
         double cosRot = Math.cos(rotationRad);
         // formula
-        int newRow = (int) Math.round(centerRow - x * sinRot + y * cosRot);
+        int newRow = (int) Math.round(centerRow - (x * sinRot + y * cosRot));
         int newCol = (int) Math.round(centerCol + x * cosRot - y * sinRot);
         int newOrientation = (minutia[2] + rotation) % 360;
         return new int[]{newRow, newCol, newOrientation};
@@ -469,7 +468,7 @@ public class Fingerprint {
                                                   int rowTranslation,
                                                   int colTranslation,
                                                   int rotation) {
-        return minutiae.stream() // for each minutia transform it
+        return minutiae.stream().parallel() // for each minutia transform it
                 .map(i -> applyTransformation(i, centerRow, centerCol, rowTranslation, colTranslation, rotation))
                 .collect(Collectors.toList()); // convert to a list again
     }
@@ -489,8 +488,9 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        return (int) minutiae1.stream() // for each minutia in minutiae1
-                .filter(i -> minutiae2.stream().anyMatch(j -> // keep it if there is any in minutiae2 that is true below
+        return (int) minutiae1.stream().parallel() // for each minutia in minutiae1
+                .filter(i -> minutiae2.stream().parallel()
+                        .anyMatch(j -> // keep it if there is any in minutiae2 that is true below
                         Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) - (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
                                 && Math.abs(i[2] - j[2]) <= maxOrientation))
                 .count(); // count how many were kept
@@ -505,11 +505,11 @@ public class Fingerprint {
      * otherwise.
      */
     public static boolean match(List<int[]> minutiae1, List<int[]> minutiae2) {
-        return minutiae1.stream() // for all minutia1
-                .anyMatch(min1 -> minutiae2.stream() // is there any in minutia2 where
+        return minutiae1.stream().parallel() // for all minutia1
+                .anyMatch(min1 -> minutiae2.stream().parallel() // is there any in minutia2 where
                         .anyMatch(min2 -> IntStream // in the angle_offset range
                                 .rangeClosed(min2[2] - min1[2] - MATCH_ANGLE_OFFSET,
-                                        min2[2] - min1[2] + MATCH_ANGLE_OFFSET)
+                                        min2[2] - min1[2] + MATCH_ANGLE_OFFSET).parallel()
                                 .anyMatch(rotation -> // the matching minutiaeCount is or the transformation is > threshold
                                         matchingMinutiaeCount(minutiae1,
                                                 applyTransformation(minutiae2,
