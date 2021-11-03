@@ -19,7 +19,7 @@ public class Main {
         //---------------------------
         // Tests functions separately
         //---------------------------
-
+        /*
         // Tested and Passing
         testGetNeighbours();
         testBlackNeighbours();
@@ -75,6 +75,40 @@ public class Main {
                 .map(f -> testCompareAllFingerprints("1_1", f, false))
                 .sum();
         System.out.println(correct);
+        */
+
+        long failTests = IntStream
+                .range(1, 17).parallel()
+                .mapToLong(f1 -> IntStream
+                        .range(f1 + 1, 17).parallel()
+                        .mapToLong(f2 -> IntStream
+                                .range(1, 9).parallel()
+                                .mapToLong(v1 -> IntStream
+                                        .range(1, 9).parallel()
+                                        .mapToObj(v2 -> testCompareFingerprints(
+                                                Integer.toString(f1) + "_" + Integer.toString(v1),
+                                                Integer.toString(f2) + "_" + Integer.toString(v2),
+                                                false))
+                                        .filter(i -> i)
+                                        .count())
+                                .sum())
+                        .sum())
+                .sum();
+        long successTests = IntStream
+                .range(1, 17).parallel()
+                .mapToLong(f1 -> IntStream
+                        .range(1, 9).parallel()
+                        .mapToLong(v1 -> IntStream
+                                .range(v1 + 1, 9).parallel()
+                                .mapToObj(v2 -> testCompareFingerprints(
+                                        Integer.toString(f1) + "_" + Integer.toString(v1),
+                                        Integer.toString(f1) + "_" + Integer.toString(v2),
+                                        true))
+                                .filter(i -> i)
+                                .count())
+                        .sum())
+                .sum();
+        System.out.println(failTests + successTests);
     }
 
     public static void testGetNeighbours() {
@@ -1243,7 +1277,7 @@ public class Main {
         boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name1 + ".png");
         // Helper.show(Helper.fromBinary(image1), "Image1");
         boolean[][] skeleton1 = Fingerprint.thin(image1);
-        //Helper.writeBinary("skeleton_" + name1 + ".png", skeleton1);
+        // Helper.writeBinary("skeleton_" + name1 + ".png", skeleton1);
         List<int[]> minutiae1 = Fingerprint.extract(skeleton1);
         //printMinutiae(minutiae1);
 
@@ -1281,7 +1315,7 @@ public class Main {
     public static int testCompareAllFingerprints(String name1, int finger, boolean expectedResult) {
         return (int) IntStream.range(1, 9).parallel()
                 .mapToObj(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult))
-                .filter(i->i)
+                .filter(i -> i)
                 .count();
     }
 

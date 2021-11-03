@@ -491,8 +491,8 @@ public class Fingerprint {
         return (int) minutiae1.stream().parallel() // for each minutia in minutiae1
                 .filter(i -> minutiae2.stream().parallel()
                         .anyMatch(j -> // keep it if there is any in minutiae2 that is true below
-                        Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) - (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
-                                && Math.abs(i[2] - j[2]) <= maxOrientation))
+                                Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) + (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
+                                        && Math.abs(i[2] - j[2]) <= maxOrientation))
                 .count(); // count how many were kept
     }
 
