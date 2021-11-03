@@ -510,10 +510,10 @@ public class Fingerprint {
                         .anyMatch(min2 -> IntStream // in the angle_offset range
                                 .rangeClosed(min2[2] - min1[2] - MATCH_ANGLE_OFFSET,
                                         min2[2] - min1[2] + MATCH_ANGLE_OFFSET).parallel()
-                                .anyMatch(rotation -> // the matching minutiaeCount is or the transformation is > threshold
+                                .anyMatch(rotation -> // is any transformation similar by >= threshold amount
                                         matchingMinutiaeCount(minutiae1,
                                                 applyTransformation(minutiae2,
-                                                        min2[0], min2[1],
+                                                        min1[0], min1[1],
                                                         min2[0] - min1[0],
                                                         min2[1] - min1[1],
                                                         rotation),

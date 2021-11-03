@@ -71,8 +71,10 @@ public class Main {
         testCompareAllFingerprints("1_1", 2, false);
 
         // compare 1_1 with all images of finger 3 to 16
-        IntStream.range(3, 17).parallel()
-                .forEach(f -> testCompareAllFingerprints("1_1", f, false));
+        int correct = IntStream.range(3, 17).parallel()
+                .map(f -> testCompareAllFingerprints("1_1", f, false))
+                .sum();
+        System.out.println(correct);
     }
 
     public static void testGetNeighbours() {
@@ -1237,7 +1239,7 @@ public class Main {
      * compare the fingerprint in the file name1.png with the fingerprint in the
      * file name2.png. The third parameter indicates if we expected a match or not.
      */
-    public static void testCompareFingerprints(String name1, String name2, boolean expectedResult) {
+    public static boolean testCompareFingerprints(String name1, String name2, boolean expectedResult) {
         boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name1 + ".png");
         // Helper.show(Helper.fromBinary(image1), "Image1");
         boolean[][] skeleton1 = Fingerprint.thin(image1);
@@ -1267,6 +1269,7 @@ public class Main {
             result.append(" Computed match: " + isMatch);
         }
         System.out.println(result);
+        return isMatch == expectedResult;
     }
 
     /**
@@ -1275,9 +1278,11 @@ public class Main {
      * fingerprints of the given finger (second parameter).
      * The third parameter indicates if we expected a match or not.
      */
-    public static void testCompareAllFingerprints(String name1, int finger, boolean expectedResult) {
-        IntStream.range(1, 9).parallel()
-                .forEach(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult));
+    public static int testCompareAllFingerprints(String name1, int finger, boolean expectedResult) {
+        return (int) IntStream.range(1, 9).parallel()
+                .mapToObj(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult))
+                .filter(i->i)
+                .count();
     }
 
 
