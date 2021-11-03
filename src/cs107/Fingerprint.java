@@ -357,8 +357,8 @@ public class Fingerprint {
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
         var connectedPixels = connectedPixels(image, row, col, distance);
-        var slope = computeSlope(connectedPixels, row, col);
-        var angle = computeAngle(connectedPixels, row, col, slope);
+        var slope = computeSlope(connectedPixels, distance, distance);
+        var angle = computeAngle(connectedPixels, distance, distance, slope);
         var angleDegrees = (int) Math.round(Math.toDegrees(angle));
         return angleDegrees < 0 ? angleDegrees + 360 : angleDegrees;
     }
@@ -378,7 +378,7 @@ public class Fingerprint {
         var thinImage = thin(image); // thin the image
         for (int i = 1; i < thinImage.length - 1; i++) // for each pixel excluding the outer edge
             for (int j = 1; j < thinImage[i].length - 1; j++) {
-                //if (thinImage[i][j]) {
+                if (thinImage[i][j]) { // if it's part of the fingerprint
                     var neighbors = getNeighbours(thinImage, i, j);
                     assert neighbors != null;
                     var transitions = transitions(neighbors);
@@ -386,7 +386,7 @@ public class Fingerprint {
                         minutia = new int[]{i, j, computeOrientation(thinImage, i, j, ORIENTATION_DISTANCE)};
                         minutiaes.add(minutia); // add it to the list
                     }
-                //}
+                }
             }
         return minutiaes;
     }

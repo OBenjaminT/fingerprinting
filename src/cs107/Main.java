@@ -20,28 +20,28 @@ public class Main {
         //---------------------------
 
         // Tested and Passing
-        //testGetNeighbours();
-        //testBlackNeighbours();
-        //testTransitions();
-        //testIdentical();
-        //testThinningStep();
-        //testConnectedPixels();
-        //testSpreadPixel();
-        //testSubClone();
-        //testmatchingMinutiaeCount();
+        testGetNeighbours();
+        testBlackNeighbours();
+        testTransitions();
+        testIdentical();
+        testThinningStep();
+        testConnectedPixels();
+        testSpreadPixel();
+        testSubClone();
+        testmatchingMinutiaeCount();
 
-        // more tests
-        //testComputeSlope();
-        //testComputeAngle();
+        // passing but more tests
+        testComputeSlope();
+        testComputeAngle();
         testThin();
+        testComputeOrientation();
+
+        //testExtract();
 
         // TODO test thinning steps 1 and 2
 
         // Un-tested
         /*
-        testComputeOrientation();
-        testOrientation();
-        testExtract();
         testApplyRotation();
         testApplyTranslation();
         */
@@ -628,9 +628,6 @@ public class Main {
             expected[9][12] = true;
             expected[8][12] = true;
             boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 10);
-            //Helper.show(image, "image");
-            //Helper.show(expected, "expected");
-            //Helper.show(connectedPixels, "result");
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
             } else {
@@ -957,29 +954,23 @@ public class Main {
     public static void testComputeOrientation() {
         // TODO more tests
         {
-            boolean[][] image = {{false, false, false, true, false},
+            boolean[][] image = {
+                    {false, false, false, true, false},
                     {false, false, true, true, false},
                     {false, true, true, false, false},
-                    {false, false, false, false, false}};
+                    {false, false, false, false, false}
+            };
             double expected = Math.round(Math.toDegrees(Math.atan(0.7)));
             double angle = Fingerprint.computeOrientation(image, 2, 1, 30);
             if (angle == expected) {
                 System.out.println("test ComputeOrientation 1: OK");
             } else {
                 System.out.println("test ComputeOrientation 1: ERROR");
+                System.out.print("Expected: ");
+                System.out.println(expected);
+                System.out.print("Computed: ");
+                System.out.println(angle);
             }
-        }
-    }
-
-    public static void testOrientation() {
-        // TODO more tests
-        {
-            boolean[][] image = {{true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}};
-            int angle = Fingerprint.computeOrientation(image, 2, 1, 3);
-            System.out.println("Expected angle: 35\t Computed angle: " + angle);
         }
     }
 
@@ -1082,10 +1073,17 @@ public class Main {
         // TODO more tests
         {
             boolean[][] image1 = Helper.readBinary("src/resources/test_inputs/1_1_small.png");
-            Helper.show(image1, "image");
+            boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_1_small.png");
             boolean[][] skeleton1 = Fingerprint.thin(image1);
-            Helper.show(skeleton1, "skeleton");
-            //Helper.writeBinary("skeleton_1_1_small.png", skeleton1);
+            if (Fingerprint.identical(expected, skeleton1)) {
+                System.out.println("test thin 1: OK");
+            } else {
+                System.out.println("test thin 1: ERROR");
+                System.out.print("Expected: ");
+                printArray(expected);
+                System.out.print("Computed: ");
+                printArray(skeleton1);
+            }
         }
     }
 
