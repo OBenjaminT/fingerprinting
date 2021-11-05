@@ -77,6 +77,10 @@ public class Main {
         System.out.println(correct);
         */
 
+        // false positive/negatives that we actually get correct?
+        testCompareFingerprints("1_1", "1_6", false); // 20
+        testCompareFingerprints("1_5", "2_3", true); // 19
+
         long successTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
             .mapToLong(f1 -> IntStream
