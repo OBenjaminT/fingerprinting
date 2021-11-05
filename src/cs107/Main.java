@@ -38,14 +38,6 @@ public class Main {
         testComputeOrientation();
         testApplyRotation();
         testApplyTranslation();
-/*
-        OK   : Compare 1_1 with 1_3. Expected match: true. Computed match: true. Match cnt: 24
-        ERROR: Compare 1_5 with 2_3. Expected match: false. Computed match: true. Match cnt: 20
-        OK   : Compare 1_1 with 2_1. Expected match: false. Computed match: false. Match cnt: 14
-*/
-        testCompareFingerprints("1_1", "1_3", true);
-        testCompareFingerprints("1_5", "2_3", true);
-        testCompareFingerprints("1_1", "2_1", false);
 
         /*
         // buggy test?
@@ -84,41 +76,41 @@ public class Main {
                 .sum();
         System.out.println(correct);
         */
-/*
-        long failTests = IntStream
-                .range(1, 17).parallel() // for each fingerprint
-                .mapToLong(f1 -> IntStream
-                        .range(f1 + 1, 17).parallel() // go through each subsequent fingerprint
-                        .mapToLong(f2 -> IntStream
-                                .range(1, 9).parallel() // go through each version of the first fingerprint
-                                .mapToLong(v1 -> IntStream
-                                        .range(1, 9).parallel() // and each version of the second fingerprint
-                                        .mapToObj(v2 -> testCompareFingerprints( // compare them, and don't expect them to match
-                                                Integer.toString(f1) + "_" + Integer.toString(v1),
-                                                Integer.toString(f2) + "_" + Integer.toString(v2),
-                                                false))
-                                        .filter(i -> i) // keep all of the correct results
-                                        .count()) // count them
-                                .sum())
-                        .sum())
-                .sum(); // count how many overall were as expected
 
         long successTests = IntStream
-                .range(1, 17).parallel() // for each fingerprint
-                .mapToLong(f1 -> IntStream
-                        .range(1, 9).parallel() // go through each version of the fingerprint
-                        .mapToLong(v1 -> IntStream
-                                .range(v1 + 1, 9).parallel() // go through subsequent version of the fingerprint
-                                .mapToObj(v2 -> testCompareFingerprints( // compare them and expect them to match
-                                        Integer.toString(f1) + "_" + Integer.toString(v1),
-                                        Integer.toString(f1) + "_" + Integer.toString(v2),
-                                        true))
-                                .filter(i -> i) // keep all of the correct results
-                                .count()) // count them
-                        .sum())
-                .sum(); // count how many overall were as expected
+            .range(1, 17).parallel() // for each fingerprint
+            .mapToLong(f1 -> IntStream
+                .range(1, 9).parallel() // go through each version of the fingerprint
+                .mapToLong(v1 -> IntStream
+                    .range(v1 + 1, 9).parallel() // go through subsequent version of the fingerprint
+                    .mapToObj(v2 -> testCompareFingerprints( // compare them and expect them to match
+                        Integer.toString(f1) + "_" + Integer.toString(v1),
+                        Integer.toString(f1) + "_" + Integer.toString(v2),
+                        true))
+                    .filter(i -> i) // keep all of the correct results
+                    .count()) // count them
+                .sum())
+            .sum(); // count how many overall were as expected
 
-        System.out.println(failTests + successTests);*/
+        long failTests = IntStream
+            .range(1, 17).parallel() // for each fingerprint
+            .mapToLong(f1 -> IntStream
+                .range(f1 + 1, 17).parallel() // go through each subsequent fingerprint
+                .mapToLong(f2 -> IntStream
+                    .range(1, 9).parallel() // go through each version of the first fingerprint
+                    .mapToLong(v1 -> IntStream
+                        .range(1, 9).parallel() // and each version of the second fingerprint
+                        .mapToObj(v2 -> testCompareFingerprints( // compare them, and don't expect them to match
+                            Integer.toString(f1) + "_" + Integer.toString(v1),
+                            Integer.toString(f2) + "_" + Integer.toString(v2),
+                            false))
+                        .filter(i -> i) // keep all of the correct results
+                        .count()) // count them
+                    .sum())
+                .sum())
+            .sum(); // count how many overall were as expected
+
+        System.out.println(failTests + successTests);
     }
 
     public static void testGetNeighbours() {
@@ -127,7 +119,7 @@ public class Main {
             boolean[][] image = {{true}};
             boolean[] neighbours = Fingerprint.getNeighbours(image, 0, 0);
             boolean[] expected = {false, false, false, false,
-                    false, false, false, false};
+                false, false, false, false};
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
@@ -156,9 +148,9 @@ public class Main {
         {
             System.out.print("testGetNeighbours 3: ");
             boolean[][] image = {
-                    {true, true, true},
-                    {true, true, true},
-                    {true, true, true},
+                {true, true, true},
+                {true, true, true},
+                {true, true, true},
             };
             boolean[] neighbours = Fingerprint.getNeighbours(image, 1, 1);
             boolean[] expected = {true, true, true, true, true, true, true, true};
@@ -190,9 +182,9 @@ public class Main {
         {
             System.out.print("testGetNeighbours 5: ");
             boolean[][] image = {
-                    {true, true, true},
-                    {true, true, true},
-                    {true, true, true}
+                {true, true, true},
+                {true, true, true},
+                {true, true, true}
             };
             boolean[] neighbours = Fingerprint.getNeighbours(image, 3, 3);
             boolean[] expected = null;
@@ -209,16 +201,16 @@ public class Main {
         {
             System.out.print("testGetNeighbours 6: ");
             boolean[][] image = {
-                    {true, true, true},
-                    {true, true, true},
-                    {true, true, true}
+                {true, true, true},
+                {true, true, true},
+                {true, true, true}
             };
             boolean[] neighbours = Fingerprint.getNeighbours(image, 1, 1);
             boolean[] expected = {true, true, true, true, true, true, true, true};
             image = new boolean[][]{
-                    {false, false, false},
-                    {false, false, false},
-                    {false, false, false}
+                {false, false, false},
+                {false, false, false},
+                {false, false, false}
             };
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
@@ -233,16 +225,16 @@ public class Main {
         {
             System.out.print("testGetNeighbours 7: ");
             boolean[][] image = {
-                    {false, true, true},
-                    {false, true, false},
-                    {false, false, false}
+                {false, true, true},
+                {false, true, false},
+                {false, false, false}
             };
             boolean[] neighbours = Fingerprint.getNeighbours(image, 1, 1);
             boolean[] expected = {true, true, false, false, false, false, false, false};
             image = new boolean[][]{
-                    {false, true, true},
-                    {false, true, false},
-                    {false, false, false}
+                {false, true, true},
+                {false, true, false},
+                {false, false, false}
             };
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
@@ -422,12 +414,12 @@ public class Main {
         {
             System.out.print("testIdentical 1: ");
             boolean[][] x = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean[][] y = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean identical = Fingerprint.identical(x, y);
             boolean expected = true;
@@ -456,8 +448,8 @@ public class Main {
         {
             System.out.print("testIdentical 3: ");
             boolean[][] x = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean[][] y = null;
             boolean identical = Fingerprint.identical(x, y);
@@ -473,13 +465,13 @@ public class Main {
         {
             System.out.print("testIdentical 4: ");
             boolean[][] x = {
-                    {true, false},
-                    {false, true},
-                    {false, false}
+                {true, false},
+                {false, true},
+                {false, false}
             };
             boolean[][] y = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean identical = Fingerprint.identical(x, y);
             boolean expected = false;
@@ -494,12 +486,12 @@ public class Main {
         {
             System.out.print("testIdentical 5: ");
             boolean[][] x = {
-                    {true, false, true},
-                    {false, true, false}
+                {true, false, true},
+                {false, true, false}
             };
             boolean[][] y = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean identical = Fingerprint.identical(x, y);
             boolean expected = false;
@@ -514,12 +506,12 @@ public class Main {
         {
             System.out.print("testIdentical 6: ");
             boolean[][] x = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean[][] y = {
-                    {true, false},
-                    {false, false}
+                {true, false},
+                {false, false}
             };
             boolean identical = Fingerprint.identical(x, y);
             boolean expected = false;
@@ -534,17 +526,17 @@ public class Main {
         {
             System.out.print("testIdentical 7: ");
             boolean[][] x = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean[][] y = {
-                    {true, false},
-                    {false, true}
+                {true, false},
+                {false, true}
             };
             boolean identical = Fingerprint.identical(x, y);
             y = new boolean[][]{
-                    {false, false},
-                    {false, true}
+                {false, false},
+                {false, true}
             };
             boolean expected = true;
             if (identical == expected) {
@@ -562,16 +554,16 @@ public class Main {
         {
             System.out.print("test ThinningStep 1: ");
             boolean[][] image = {
-                    {false, false, true, true},
-                    {false, false, true, false},
-                    {false, false, false, false},
-                    {false, false, false, false}
+                {false, false, true, true},
+                {false, false, true, false},
+                {false, false, false, false},
+                {false, false, false, false}
             };
             boolean[][] expected = {
-                    {false, false, true, false},
-                    {false, false, false, false},
-                    {false, false, false, false},
-                    {false, false, false, false}
+                {false, false, true, false},
+                {false, false, false, false},
+                {false, false, false, false},
+                {false, false, false, false}
             };
             boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
             if (Fingerprint.identical(thinningStep, expected))
@@ -585,16 +577,16 @@ public class Main {
         {
             System.out.print("test ThinningStep 2: ");
             boolean[][] image = {
-                    {false, false, false, false},
-                    {false, false, false, false},
-                    {true, true, false, false},
-                    {true, false, true, false}
+                {false, false, false, false},
+                {false, false, false, false},
+                {true, true, false, false},
+                {true, false, true, false}
             };
             boolean[][] expected = {
-                    {false, false, false, false},
-                    {false, false, false, false},
-                    {true, true, false, false},
-                    {false, false, true, false}
+                {false, false, false, false},
+                {false, false, false, false},
+                {true, true, false, false},
+                {false, false, true, false}
             };
             boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
             if (Fingerprint.identical(thinningStep, expected))
@@ -608,16 +600,16 @@ public class Main {
         {
             System.out.print("test ThinningStep 3: ");
             boolean[][] image = {
-                    {false, false, false, false},
-                    {false, false, false, false},
-                    {true, true, false, false},
-                    {true, false, false, false}
+                {false, false, false, false},
+                {false, false, false, false},
+                {true, true, false, false},
+                {true, false, false, false}
             };
             boolean[][] expected = {
-                    {false, false, false, false},
-                    {false, false, false, false},
-                    {true, false, false, false},
-                    {false, false, false, false}
+                {false, false, false, false},
+                {false, false, false, false},
+                {true, false, false, false},
+                {false, false, false, false}
             };
             boolean[][] thinningStep = Fingerprint.thinningStep(image, 1);
             if (Fingerprint.identical(thinningStep, expected))
@@ -631,16 +623,16 @@ public class Main {
         {
             System.out.print("test ThinningStep 4: ");
             boolean[][] image = {
-                    {false, false, true, true},
-                    {false, false, true, false},
-                    {false, false, false, false},
-                    {false, false, false, false}
+                {false, false, true, true},
+                {false, false, true, false},
+                {false, false, false, false},
+                {false, false, false, false}
             };
             boolean[][] expected = {
-                    {false, false, true, false},
-                    {false, false, false, false},
-                    {false, false, false, false},
-                    {false, false, false, false}
+                {false, false, true, false},
+                {false, false, false, false},
+                {false, false, false, false},
+                {false, false, false, false}
             };
             boolean[][] thinningStep = Fingerprint.thinningStep(image, 0);
             if (Fingerprint.identical(thinningStep, expected))
@@ -657,10 +649,10 @@ public class Main {
         {
             System.out.print("testConnectedPixels 1: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             boolean[][] expected = new boolean[21][21];
             expected[10][10] = true;
@@ -682,15 +674,15 @@ public class Main {
         {
             System.out.print("testConnectedPixels 2: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             boolean[][] expected = {
-                    {false, false, true},
-                    {false, true, true},
-                    {false, false, false}
+                {false, false, true},
+                {false, true, true},
+                {false, false, false}
             };
             boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 1);
             if (arrayEqual(connectedPixels, expected)) {
@@ -706,17 +698,17 @@ public class Main {
         {
             System.out.print("testConnectedPixels 3: ");
             boolean[][] image = {
-                    {true, false, false, true, true},
-                    {true, false, true, true, false},
-                    {true, true, false, false, false},
-                    {false, true, false, true, false}
+                {true, false, false, true, true},
+                {true, false, true, true, false},
+                {true, true, false, false, false},
+                {false, true, false, true, false}
             };
             boolean[][] expected = {
-                    {false, true, false, false, true},
-                    {false, true, false, true, true},
-                    {false, true, true, false, false},
-                    {false, false, true, false, false},
-                    {false, false, false, false, false}
+                {false, true, false, false, true},
+                {false, true, false, true, true},
+                {false, true, true, false, false},
+                {false, false, true, false, false},
+                {false, false, false, false, false}
             };
             boolean[][] connectedPixels = Fingerprint.connectedPixels(image, 2, 1, 2);
             if (arrayEqual(connectedPixels, expected)) {
@@ -735,10 +727,10 @@ public class Main {
         {
             System.out.print("testSpreadPixel 1: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, true, false, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, true, false, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             int squareSideLength = 3;
             int col = 1;
@@ -765,10 +757,10 @@ public class Main {
         {
             System.out.print("testSpreadPixel 2: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, false, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, false, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             int squareSideLength = 3;
             int col = 1;
@@ -791,10 +783,10 @@ public class Main {
         {
             System.out.print("testSpreadPixel 3: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, true, false, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, true, false, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             int squareSideLength = 3;
             int col = 0;
@@ -822,10 +814,10 @@ public class Main {
         {
             System.out.print("testSubClone1: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             boolean[][] expected = new boolean[21][21];
             expected[0][0] = true;
@@ -848,10 +840,10 @@ public class Main {
         {
             System.out.print("testSubClone2: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             boolean[][] expected = new boolean[21][21];
             expected[0][0] = true;
@@ -870,10 +862,10 @@ public class Main {
         {
             System.out.print("testSubClone3: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             boolean[][] expected = new boolean[21][21];
             expected[10][10] = true;
@@ -896,10 +888,10 @@ public class Main {
         {
             System.out.print("testSubClone4: ");
             boolean[][] image = {
-                    {true, false, false, true},
-                    {false, false, true, true},
-                    {false, true, true, false},
-                    {false, false, false, false}
+                {true, false, false, true},
+                {false, false, true, true},
+                {false, true, true, false},
+                {false, false, false, false}
             };
             boolean[][] expected = new boolean[0][0];
             boolean[][] clone = Fingerprint.subClone(image, 0, 0, 0);
@@ -919,10 +911,10 @@ public class Main {
         //TODO improve test
         {
             boolean[][] image = {
-                    {false, false, false, true, false},
-                    {false, false, true, true, false},
-                    {false, true, true, false, false},
-                    {false, false, false, false, false}
+                {false, false, false, true, false},
+                {false, false, true, true, false},
+                {false, true, true, false, false},
+                {false, false, false, false, false}
             };
             double expected = 0.7;
             double slope = Fingerprint.computeSlope(image, 2, 1);
@@ -942,10 +934,10 @@ public class Main {
         //TODO improve test
         {
             boolean[][] image = {
-                    {false, false, false, true, false},
-                    {false, false, true, true, false},
-                    {false, true, true, false, false},
-                    {false, false, false, false, false}
+                {false, false, false, true, false},
+                {false, false, true, true, false},
+                {false, true, true, false, false},
+                {false, false, false, false, false}
             };
             double expected = Math.atan(0.7);
             double slope = Fingerprint.computeSlope(image, 2, 1);
@@ -966,10 +958,10 @@ public class Main {
         {
             System.out.print("test Extract 1: ");
             boolean[][] image = {
-                    {false, false, false, true, false},
-                    {false, false, true, true, false},
-                    {false, true, true, false, false},
-                    {false, false, false, false, false}
+                {false, false, false, true, false},
+                {false, false, true, true, false},
+                {false, true, true, false, false},
+                {false, false, false, false, false}
             };
             double slope = Fingerprint.computeSlope(image, 2, 1);
             double angle = Fingerprint.computeAngle(image, 2, 1, slope);
@@ -995,10 +987,10 @@ public class Main {
         // TODO more tests
         {
             boolean[][] image = {
-                    {false, false, false, true, false},
-                    {false, false, true, true, false},
-                    {false, true, true, false, false},
-                    {false, false, false, false, false}
+                {false, false, false, true, false},
+                {false, false, true, true, false},
+                {false, true, true, false, false},
+                {false, false, false, false, false}
             };
             double expected = Math.round(Math.toDegrees(Math.atan(0.7)));
             double angle = Fingerprint.computeOrientation(image, 2, 1, 30);
@@ -1324,9 +1316,9 @@ public class Main {
      */
     public static int testCompareAllFingerprints(String name1, int finger, boolean expectedResult) {
         return (int) IntStream.range(1, 9).parallel()
-                .mapToObj(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult))
-                .filter(i -> i)
-                .count();
+            .mapToObj(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult))
+            .filter(i -> i)
+            .count();
     }
 
 
