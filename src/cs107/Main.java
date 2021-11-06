@@ -20,6 +20,7 @@ public class Main {
         // Tests functions separately
         //---------------------------
 
+        /*
         // Tested and Passing
         testGetNeighbours();
         testBlackNeighbours();
@@ -38,6 +39,7 @@ public class Main {
         testComputeOrientation();
         testApplyRotation();
         testApplyTranslation();
+        */
 
         /*
         // buggy test?
@@ -78,8 +80,8 @@ public class Main {
         */
 
         // false positive/negatives that we actually get correct?
-        testCompareFingerprints("1_1", "1_6", false); // 20
-        testCompareFingerprints("1_5", "2_3", true); // 19
+        // testCompareFingerprints("1_1", "1_6", false); // 20
+        // testCompareFingerprints("1_5", "2_3", true); // 19
 
         long successTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
@@ -1300,6 +1302,7 @@ public class Main {
         //Helper.writeARGB("./minutiae_" + name2 + ".png", colorImageSkeleton2);
 
         boolean isMatch = Fingerprint.match(minutiae1, minutiae2);
+        /*
         var result = new StringBuilder();
         result.append("Compare " + name1 + " with " + name2);
         if (isMatch == expectedResult)
@@ -1309,6 +1312,15 @@ public class Main {
             result.append(" Computed match: " + isMatch);
         }
         System.out.println(result);
+        */
+        if (isMatch != expectedResult) {
+            var result = new StringBuilder();
+            result.append("Compare " + name1 + " with " + name2);
+            result.append(". Expected match: " + expectedResult);
+            result.append(" Computed match: " + isMatch);
+            System.out.println(result);
+        }
+
         return isMatch == expectedResult;
     }
 
