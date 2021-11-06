@@ -21,24 +21,26 @@ public class Main {
         //---------------------------
 
         // Tested and Passing
-        testGetNeighbours();
+        /*testGetNeighbours();
         testBlackNeighbours();
         testTransitions();
         testIdentical();
         testThinningStep();
         testConnectedPixels();
-        testSpreadPixel();
-        testSubClone();
-        testmatchingMinutiaeCount();
+        testSpreadPixel();*/
+        //testSubClone();
+        //testmatchingMinutiaeCount();
 
         // passing but more tests recommended
-        testThin();
+/*        testThin();
         testComputeSlope();
         testComputeAngle();
         testComputeOrientation();
         testApplyRotation();
-        testApplyTranslation();
-
+        testApplyTranslation();*/
+        //testCompareFingerprints("1_1", "1_3", true);
+        testCompareFingerprints("1_5", "2_3", true);
+        //testCompareFingerprints("1_5" , "14_7", false);
         /*
         // buggy test?
         //testExtract();
@@ -46,18 +48,18 @@ public class Main {
         // TODO test thinning steps 1 and 2
 
 
-        //testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
+        testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
         //testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
         //testDrawSkeleton("2_1"); //draw skeleton of fingerprint 2_1.png
 
         //testDrawMinutiae("1_1"); //draw minutiae of fingerprint 1_1.png
         //testDrawMinutiae("1_2"); //draw minutiae of fingerprint 1_2.png
-        //testDrawMinutiae("2_1"); //draw minutiae of fingerprint 2_1.png
+        testDrawMinutiae("2_1"); //draw minutiae of fingerprint 2_1.png
 
         //testWithSkeleton();
         //---------------------------
         // Test overall functionality
-        //---------------------------
+        //---------------------------+
         // compare 1_1.png with 1_2.png: they are supposed to match
         testCompareFingerprints("1_1", "1_2", true);  //expected match: true
 
@@ -65,7 +67,7 @@ public class Main {
         testCompareFingerprints("1_1", "2_1", false); //expected match: false
 
         // compare 1_1 with all other images of the same finger
-        testCompareAllFingerprints("1_1", 1, true);
+       testCompareAllFingerprints("1_1", 1, true);
 
         // compare 1_1 with all images of finger 2
         testCompareAllFingerprints("1_1", 2, false);
@@ -78,10 +80,10 @@ public class Main {
         */
 
         // false positive/negatives that we actually get correct?
-        testCompareFingerprints("1_1", "1_6", false); // 20
-        testCompareFingerprints("1_5", "2_3", true); // 19
+        //testCompareFingerprints("1_1", "1_6", false); // 20
+        //testCompareFingerprints("1_5", "2_3", true); // 19
 
-        long successTests = IntStream
+        /*long successTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
             .mapToLong(f1 -> IntStream
                 .range(1, 9).parallel() // go through each version of the fingerprint
@@ -94,9 +96,9 @@ public class Main {
                     .filter(i -> i) // keep all of the correct results
                     .count()) // count them
                 .sum())
-            .sum(); // count how many overall were as expected
+            .sum(); // count how many overall were as expected*/
 
-        long failTests = IntStream
+        /*long failTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
             .mapToLong(f1 -> IntStream
                 .range(f1 + 1, 17).parallel() // go through each subsequent fingerprint
@@ -114,7 +116,7 @@ public class Main {
                 .sum())
             .sum(); // count how many overall were as expected
 
-        System.out.println(failTests + successTests);
+        System.out.println(failTests + successTests);*/
     }
 
     public static void testGetNeighbours() {
@@ -959,6 +961,7 @@ public class Main {
     }
 
     public static void testExtract() {
+        //TODO improve test, this one is temporary until getConnectedPixels works
         {
             System.out.print("test Extract 1: ");
             boolean[][] image = {
