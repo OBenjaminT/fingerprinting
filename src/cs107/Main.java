@@ -3,12 +3,13 @@ package cs107;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
  * This class will not be graded. You can use it to test your program.
  */
-@SuppressWarnings("all")
 public class Main {
     /**
      * Main entry point of the program.
@@ -19,9 +20,10 @@ public class Main {
         //---------------------------
         // Tests functions separately
         //---------------------------
+        SignatureChecks.check();
 
         // Tested and Passing
-        /*
+
         testGetNeighbours();
         testBlackNeighbours();
         testTransitions();
@@ -30,24 +32,26 @@ public class Main {
         testConnectedPixels();
         testSpreadPixel();
         testSubClone();
-        testmatchingMinutiaeCount();
-         */
+        testMatchingMinutiaeCount();
+
+
+        //testPrintError();
 
         // passing but more tests recommended
-        /*
         testThin();
         testComputeSlope();
         testComputeAngle();
         testComputeOrientation();
         testApplyRotation();
         testApplyTranslation();
-        */
+
 
         /*
         // buggy test?
         //testExtract();
 
         // TODO test thinning steps 1 and 2
+        //testApplyTranslation
 
 
         //testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
@@ -85,6 +89,30 @@ public class Main {
         testCompareFingerprints("1_1", "1_6", false); // 20
         testCompareFingerprints("1_5", "2_3", true); // 19
 
+        // random check
+         var randomCheck = new Random()
+            .ints(1,17)
+            .limit(4).parallel() // for each fingerprint
+            .mapToLong(f1 -> new Random()
+                .ints(1, 17)
+                .limit(1).parallel() // go through each subsequent fingerprint
+                .mapToLong(f2 -> new Random()
+                    .ints(1, 9)
+                    .limit(2).parallel() // go through each version of the first fingerprint
+                    .mapToLong(v1 -> new Random()
+                        .ints(1, 9)
+                        .limit(1).parallel() // and each version of the second fingerprint
+                        .mapToObj(v2 -> testCompareFingerprints( // compare them, and don't expect them to match
+                            f1 + "_" + v1,
+                            f2 + "_" + v2,
+                            f1 == f2))
+                        .filter(i -> i) // keep all the correct results
+                        .count()) // count them
+                    .sum())
+                .sum())
+            .sum();
+         System.out.println(randomCheck + " / 8");
+
         /*
         long successTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
@@ -93,14 +121,15 @@ public class Main {
                 .mapToLong(v1 -> IntStream
                     .range(v1 + 1, 9).parallel() // go through subsequent version of the fingerprint
                     .mapToObj(v2 -> testCompareFingerprints( // compare them and expect them to match
-                        Integer.toString(f1) + "_" + Integer.toString(v1),
-                        Integer.toString(f1) + "_" + Integer.toString(v2),
+                        f1 + "_" + v1,
+                        f1 + "_" + v2,
                         true))
                     .filter(i -> i) // keep all of the correct results
                     .count()) // count them
                 .sum())
             .sum(); // count how many overall were as expected
-
+        */
+        /*
         long failTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
             .mapToLong(f1 -> IntStream
@@ -110,22 +139,21 @@ public class Main {
                     .mapToLong(v1 -> IntStream
                         .range(1, 9).parallel() // and each version of the second fingerprint
                         .mapToObj(v2 -> testCompareFingerprints( // compare them, and don't expect them to match
-                            Integer.toString(f1) + "_" + Integer.toString(v1),
-                            Integer.toString(f2) + "_" + Integer.toString(v2),
+                            f1 + "_" + v1,
+                            f2 + "_" + v2,
                             false))
                         .filter(i -> i) // keep all of the correct results
                         .count()) // count them
                     .sum())
                 .sum())
             .sum(); // count how many overall were as expected
-
-        System.out.println(failTests + successTests);
         */
+        //System.out.println(failTests + successTests);
     }
 
     public static void testGetNeighbours() {
         {
-            System.out.print("testGetNeighbours 1: ");
+            System.out.print("test GetNeighbours 1: ");
             boolean[][] image = {{true}};
             boolean[] neighbours = Fingerprint.getNeighbours(image, 0, 0);
             boolean[] expected = {false, false, false, false,
@@ -133,30 +161,22 @@ public class Main {
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
         {
-            System.out.print("testGetNeighbours 2: ");
+            System.out.print("test GetNeighbours 2: ");
             boolean[][] image = {{true, true}};
             boolean[] neighbours = Fingerprint.getNeighbours(image, 0, 0);
             boolean[] expected = {false, false, true, false, false, false, false, false};
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
         {
-            System.out.print("testGetNeighbours 3: ");
+            System.out.print("test GetNeighbours 3: ");
             boolean[][] image = {
                 {true, true, true},
                 {true, true, true},
@@ -167,30 +187,22 @@ public class Main {
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
         {
-            System.out.print("testGetNeighbours 4: ");
+            System.out.print("test GetNeighbours 4: ");
             boolean[][] image = {{}};
             boolean[] neighbours = Fingerprint.getNeighbours(image, 0, 0);
             boolean[] expected = null;
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
         {
-            System.out.print("testGetNeighbours 5: ");
+            System.out.print("test GetNeighbours 5: ");
             boolean[][] image = {
                 {true, true, true},
                 {true, true, true},
@@ -201,15 +213,11 @@ public class Main {
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
         {
-            System.out.print("testGetNeighbours 6: ");
+            System.out.print("test GetNeighbours 6: ");
             boolean[][] image = {
                 {true, true, true},
                 {true, true, true},
@@ -225,15 +233,11 @@ public class Main {
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
         {
-            System.out.print("testGetNeighbours 7: ");
+            System.out.print("test GetNeighbours 7: ");
             boolean[][] image = {
                 {false, true, true},
                 {false, true, false},
@@ -249,180 +253,152 @@ public class Main {
             if (arrayEqual(neighbours, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(neighbours);
+                printError(expected, neighbours);
             }
         }
     }
 
     public static void testBlackNeighbours() {
         {
-            System.out.print("testBlackNeighbours 1: ");
+            System.out.print("test BlackNeighbours 1: ");
             boolean[] neighbors = {true};
             int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
             int expected = 1;
             if (blackNeighbours == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + blackNeighbours);
+                printError(expected, blackNeighbours);
             }
         }
         {
-            System.out.print("testBlackNeighbours 2: ");
+            System.out.print("test BlackNeighbours 2: ");
             boolean[] neighbors = {false};
             int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
             int expected = 0;
             if (blackNeighbours == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + blackNeighbours);
+                printError(expected, blackNeighbours);
             }
         }
         {
-            System.out.print("testBlackNeighbours 3: ");
+            System.out.print("test BlackNeighbours 3: ");
             boolean[] neighbors = {};
             int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
             int expected = 0;
             if (blackNeighbours == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + blackNeighbours);
+                printError(expected, blackNeighbours);
             }
         }
         {
-            System.out.print("testBlackNeighbours 4: ");
+            System.out.print("test BlackNeighbours 4: ");
             boolean[] neighbors = {true, false, true, false, true, false, true, false};
             int blackNeighbours = Fingerprint.blackNeighbours(neighbors);
             int expected = 4;
             if (blackNeighbours == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + blackNeighbours);
+                printError(expected, blackNeighbours);
             }
         }
     }
 
     public static void testTransitions() {
         {
-            System.out.print("testTransitions 1: ");
+            System.out.print("test Transitions 1: ");
             boolean[] neighbours = {true, false, true, false, false};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 2;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 2: ");
+            System.out.print("test Transitions 2: ");
             boolean[] neighbours = {true, true, false, false, false, false, false, false};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 1;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 3: ");
+            System.out.print("test Transitions 3: ");
             boolean[] neighbours = {false, false, false, false, false};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 0;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 4: ");
+            System.out.print("test Transitions 4: ");
             boolean[] neighbours = {true, true, true, true, true};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 0;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 5: ");
+            System.out.print("test Transitions 5: ");
             boolean[] neighbours = {false};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 0;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 6: ");
+            System.out.print("test Transitions 6: ");
             boolean[] neighbours = {true};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 0;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 7: ");
+            System.out.print("test Transitions 7: ");
             boolean[] neighbours = {};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 0;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
         {
-            System.out.print("testTransitions 8: ");
+            System.out.print("test Transitions 8: ");
             boolean[] neighbours = {true, false, true, false, true};
             int transitions = Fingerprint.transitions(neighbours);
             int expected = 2;
             if (transitions == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.println("Expected: " + expected);
-                System.out.println("Computed: " + transitions);
+                printError(expected, transitions);
             }
         }
     }
 
     public static void testIdentical() {
         {
-            System.out.print("testIdentical 1: ");
+            System.out.print("test Identical 1: ");
             boolean[][] x = {
                 {true, false},
                 {false, true}
@@ -436,13 +412,11 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
         {
-            System.out.print("testIdentical 2: ");
+            System.out.print("test Identical 2: ");
             boolean[][] x = null;
             boolean[][] y = null;
             boolean identical = Fingerprint.identical(x, y);
@@ -450,13 +424,11 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
         {
-            System.out.print("testIdentical 3: ");
+            System.out.print("test Identical 3: ");
             boolean[][] x = {
                 {true, false},
                 {false, true}
@@ -467,13 +439,11 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
         {
-            System.out.print("testIdentical 4: ");
+            System.out.print("test Identical 4: ");
             boolean[][] x = {
                 {true, false},
                 {false, true},
@@ -488,13 +458,11 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
         {
-            System.out.print("testIdentical 5: ");
+            System.out.print("test Identical 5: ");
             boolean[][] x = {
                 {true, false, true},
                 {false, true, false}
@@ -508,13 +476,11 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
         {
-            System.out.print("testIdentical 6: ");
+            System.out.print("test Identical 6: ");
             boolean[][] x = {
                 {true, false},
                 {false, true}
@@ -528,13 +494,11 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
         {
-            System.out.print("testIdentical 7: ");
+            System.out.print("test Identical 7: ");
             boolean[][] x = {
                 {true, false},
                 {false, true}
@@ -552,9 +516,7 @@ public class Main {
             if (identical == expected) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + identical);
+                printError(expected, identical);
             }
         }
     }
@@ -579,9 +541,7 @@ public class Main {
             if (Fingerprint.identical(thinningStep, expected))
                 System.out.println("OK");
             else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + thinningStep);
+                printError(expected, thinningStep);
             }
         }
         {
@@ -602,9 +562,7 @@ public class Main {
             if (Fingerprint.identical(thinningStep, expected))
                 System.out.println("OK");
             else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + thinningStep);
+                printError(expected, thinningStep);
             }
         }
         {
@@ -625,9 +583,7 @@ public class Main {
             if (Fingerprint.identical(thinningStep, expected))
                 System.out.println("OK");
             else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + thinningStep);
+                printError(expected, thinningStep);
             }
         }
         {
@@ -648,16 +604,14 @@ public class Main {
             if (Fingerprint.identical(thinningStep, expected))
                 System.out.println("OK");
             else {
-                System.out.println("ERROR");
-                System.out.print("Expected: " + expected);
-                System.out.print("Computed: " + thinningStep);
+                printError(expected, thinningStep);
             }
         }
     }
 
     public static void testConnectedPixels() {
         {
-            System.out.print("testConnectedPixels 1: ");
+            System.out.print("test ConnectedPixels 1: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, true, true},
@@ -674,15 +628,11 @@ public class Main {
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printError(expected, connectedPixels);
             }
         }
         {
-            System.out.print("testConnectedPixels 2: ");
+            System.out.print("test ConnectedPixels 2: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, true, true},
@@ -698,15 +648,11 @@ public class Main {
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printError(expected, connectedPixels);
             }
         }
         {
-            System.out.print("testConnectedPixels 3: ");
+            System.out.print("test ConnectedPixels 3: ");
             boolean[][] image = {
                 {true, false, false, true, true},
                 {true, false, true, true, false},
@@ -724,18 +670,14 @@ public class Main {
             if (arrayEqual(connectedPixels, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(connectedPixels);
+                printError(expected, connectedPixels);
             }
         }
     }
 
     public static void testSpreadPixel() {
         {
-            System.out.print("testSpreadPixel 1: ");
+            System.out.print("test SpreadPixel 1: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, true, false, true},
@@ -757,15 +699,11 @@ public class Main {
             if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(relevant);
+                printError(expected, relevant);
             }
         }
         {
-            System.out.print("testSpreadPixel 2: ");
+            System.out.print("test SpreadPixel 2: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, false, true},
@@ -783,15 +721,11 @@ public class Main {
             if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(relevant);
+                printError(expected, relevant);
             }
         }
         {
-            System.out.print("testSpreadPixel 3: ");
+            System.out.print("test SpreadPixel 3: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, true, false, true},
@@ -811,18 +745,14 @@ public class Main {
             if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(relevant);
+                printError(expected, relevant);
             }
         }
     }
 
     public static void testSubClone() {
         {
-            System.out.print("testSubClone1: ");
+            System.out.print("test SubClone1: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, true, true},
@@ -840,15 +770,11 @@ public class Main {
             if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(clone);
+                printError(expected, clone);
             }
         }
         {
-            System.out.print("testSubClone2: ");
+            System.out.print("test SubClone2: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, true, true},
@@ -862,15 +788,11 @@ public class Main {
             if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(clone);
+                printError(expected, clone);
             }
         }
         {
-            System.out.print("testSubClone3: ");
+            System.out.print("test SubClone3: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, true, true},
@@ -888,15 +810,11 @@ public class Main {
             if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(clone);
+                printError(expected, clone);
             }
         }
         {
-            System.out.print("testSubClone4: ");
+            System.out.print("test SubClone4: ");
             boolean[][] image = {
                 {true, false, false, true},
                 {false, false, true, true},
@@ -908,11 +826,7 @@ public class Main {
             if (arrayEqual(clone, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(clone);
+                printError(expected, clone);
             }
         }
     }
@@ -931,11 +845,7 @@ public class Main {
             if (slope == expected) {
                 System.out.println("test ComputeSlope 1: OK");
             } else {
-                System.out.println("test ComputeSlope 1: ERROR");
-                System.out.print("Expected: ");
-                System.out.print(expected);
-                System.out.print("Computed: ");
-                System.out.print(slope);
+                printError(expected, slope);
             }
         }
     }
@@ -955,11 +865,7 @@ public class Main {
             if (angle == expected) {
                 System.out.println("test ComputeAngle 1: OK");
             } else {
-                System.out.println("test ComputeAngle 1: ERROR");
-                System.out.print("Expected: ");
-                System.out.print(expected);
-                System.out.print("Computed: ");
-                System.out.print(angle);
+                printError(expected, slope);
             }
         }
     }
@@ -973,9 +879,6 @@ public class Main {
                 {false, true, true, false, false},
                 {false, false, false, false, false}
             };
-            double slope = Fingerprint.computeSlope(image, 2, 1);
-            double angle = Fingerprint.computeAngle(image, 2, 1, slope);
-            var angleDegrees = (int) Math.round(Math.toDegrees(angle));
             var expected = new ArrayList<int[]>();
             expected.add(new int[]{2, 1, 270});
 
@@ -984,11 +887,7 @@ public class Main {
             if (minutiaes.equals(expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                expected.stream().forEach(i -> printArray(i));
-                System.out.print("Computed: ");
-                minutiaes.stream().forEach(i -> printArray(i));
+                printError(expected, minutiaes);
             }
         }
     }
@@ -1007,11 +906,7 @@ public class Main {
             if (angle == expected) {
                 System.out.println("test ComputeOrientation 1: OK");
             } else {
-                System.out.println("test ComputeOrientation 1: ERROR");
-                System.out.print("Expected: ");
-                System.out.println(expected);
-                System.out.print("Computed: ");
-                System.out.println(angle);
+                printError(expected, angle);
             }
         }
     }
@@ -1028,11 +923,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
         {
@@ -1042,11 +933,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
         {
@@ -1056,11 +943,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
         {
@@ -1070,11 +953,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
         {
@@ -1084,11 +963,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
     }
@@ -1104,11 +979,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
         {
@@ -1118,11 +989,7 @@ public class Main {
             if (Arrays.equals(result, expected)) {
                 System.out.println("OK");
             } else {
-                System.out.println("ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(result);
+                printError(expected, result);
             }
         }
     }
@@ -1131,7 +998,7 @@ public class Main {
         //TODO test this
     }
 
-    public static void testmatchingMinutiaeCount() {
+    public static void testMatchingMinutiaeCount() {
         {
             ArrayList<int[]> minutiae1 = new ArrayList<>();
             minutiae1.add(new int[]{1, 50, 36});
@@ -1142,9 +1009,9 @@ public class Main {
             int result = Fingerprint.matchingMinutiaeCount(minutiae1, minutiae2, Fingerprint.DISTANCE_THRESHOLD, Fingerprint.ORIENTATION_DISTANCE);
             int expected = 2;
             if (result == expected) {
-                System.out.println("testmatchingMinutiaeCount 1 : OK");
+                System.out.println("test MatchingMinutiaeCount 1 : OK");
             } else {
-                System.out.println("testmatchingMinutiaeCount 1 : ERROR");
+                printError(expected, result);
             }
         }
 
@@ -1160,9 +1027,9 @@ public class Main {
             int result = Fingerprint.matchingMinutiaeCount(minutiae1, minutiae2, Fingerprint.DISTANCE_THRESHOLD, Fingerprint.ORIENTATION_DISTANCE);
             int expected = 2;
             if (result == expected) {
-                System.out.println("testmatchingMinutiaeCount 2 : OK");
+                System.out.println("test MatchingMinutiaeCount 2 : OK");
             } else {
-                System.out.println("testmatchingMinutiaeCount 2 : ERROR");
+                printError(expected, result);
             }
         }
     }
@@ -1179,57 +1046,45 @@ public class Main {
         {
             boolean[][] image1 = Helper.readBinary("src/resources/test_inputs/1_1_small.png");
             boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_1_small.png");
+            assert image1 != null;
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             if (Fingerprint.identical(expected, skeleton1)) {
                 System.out.println("test thin 1: OK");
             } else {
-                System.out.println("test thin 1: ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(skeleton1);
+                printError(expected, skeleton1);
             }
         }
         {
             boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/1_1.png");
             boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_1.png");
+            assert image1 != null;
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             if (Fingerprint.identical(expected, skeleton1)) {
                 System.out.println("test thin 2: OK");
             } else {
-                System.out.println("test thin 2: ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(skeleton1);
+                printError(expected, skeleton1);
             }
         }
         {
             boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/1_2.png");
             boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_2.png");
+            assert image1 != null;
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             if (Fingerprint.identical(expected, skeleton1)) {
                 System.out.println("test thin 3: OK");
             } else {
-                System.out.println("test thin 3: ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(skeleton1);
+                printError(expected, skeleton1);
             }
         }
         {
             boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/2_1.png");
             boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_2_1.png");
+            assert image1 != null;
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             if (Fingerprint.identical(expected, skeleton1)) {
                 System.out.println("test thin 4: OK");
             } else {
-                System.out.println("test thin 4: ERROR");
-                System.out.print("Expected: ");
-                printArray(expected);
-                System.out.print("Computed: ");
-                printArray(skeleton1);
+                printError(expected, skeleton1);
             }
         }
     }
@@ -1237,6 +1092,7 @@ public class Main {
     public static void testDrawSkeleton(String name) {
         {
             boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name + ".png");
+            assert image1 != null;
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             Helper.writeBinary("skeleton_" + name + ".png", skeleton1);
         }
@@ -1245,6 +1101,7 @@ public class Main {
     public static void testDrawMinutiae(String name) {
         {
             boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name + ".png");
+            assert image1 != null;
             boolean[][] skeleton1 = Fingerprint.thin(image1);
             List<int[]> minutia1 = Fingerprint.extract(skeleton1);
             int[][] colorImageSkeleton1 = Helper.fromBinary(skeleton1);
@@ -1274,6 +1131,7 @@ public class Main {
             printMinutiae(minutiae1);
 
             // Draw the minutiae on top of the thinned image
+            assert skeleton1 != null;
             int[][] colorImageSkeleton1 = Helper.fromBinary(skeleton1);
             Helper.drawMinutia(colorImageSkeleton1, minutiae1);
             Helper.writeARGB("minutiae_skeletonTest.png", colorImageSkeleton1);
@@ -1287,32 +1145,23 @@ public class Main {
      */
     public static boolean testCompareFingerprints(String name1, String name2, boolean expectedResult) {
         boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + name1 + ".png");
-        // Helper.show(Helper.fromBinary(image1), "Image1");
+        assert image1 != null;
         boolean[][] skeleton1 = Fingerprint.thin(image1);
-        // Helper.writeBinary("skeleton_" + name1 + ".png", skeleton1);
         List<int[]> minutiae1 = Fingerprint.extract(skeleton1);
-        //printMinutiae(minutiae1);
-
-        //int[][] colorImageSkeleton1 = Helper.fromBinary(skeleton1);
-        //Helper.drawMinutia(colorImageSkeleton1, minutiae1);
-        //Helper.writeARGB("./minutiae_" + name1 + ".png", colorImageSkeleton1);
 
         boolean[][] image2 = Helper.readBinary("src/resources/fingerprints/" + name2 + ".png");
+        assert image2 != null;
         boolean[][] skeleton2 = Fingerprint.thin(image2);
         List<int[]> minutiae2 = Fingerprint.extract(skeleton2);
 
-        //int[][] colorImageSkeleton2 = Helper.fromBinary(skeleton2);
-        //Helper.drawMinutia(colorImageSkeleton2, minutiae2);
-        //Helper.writeARGB("./minutiae_" + name2 + ".png", colorImageSkeleton2);
-
         boolean isMatch = Fingerprint.match(minutiae1, minutiae2);
         var result = new StringBuilder();
-        result.append("Compare " + name1 + " with " + name2);
+        result.append("Compare ").append(name1).append(" with ").append(name2);
         if (isMatch == expectedResult)
             result.append(". OK!");
         else {
-            result.append(". Expected match: " + expectedResult);
-            result.append(" Computed match: " + isMatch);
+            result.append(". Expected match: ").append(expectedResult);
+            result.append(" Computed match: ").append(isMatch);
         }
         System.out.println(result);
         return isMatch == expectedResult;
@@ -1329,6 +1178,67 @@ public class Main {
             .mapToObj(i -> testCompareFingerprints(name1, finger + "_" + i, expectedResult))
             .filter(i -> i)
             .count();
+    }
+
+
+    public static void testPrintError() {
+        printError(true, false);
+
+        boolean[] arr1 = {true, false};
+        boolean[] arr2 = {false, true};
+        printError(arr1, arr2);
+
+        boolean[][] dArr1 = {{true, false}, {false, true}};
+        boolean[][] dArr2 = {{false, true}, {false, true}};
+        printError(dArr1, dArr2);
+
+        int int1 = 1;
+        int int2 = 2;
+        printError(int1, int2);
+
+        double double1 = 1;
+        double double2 = 2;
+        printError(double1, double2);
+
+        List<int[]> listIntArr1 = new ArrayList<>();
+        listIntArr1.add(new int[]{2, 4});
+        listIntArr1.add(new int[]{5, 6});
+        List<int[]> listIntArr2 = new ArrayList<>();
+        listIntArr2.add(new int[]{4, 1});
+        listIntArr2.add(new int[]{6, 8});
+        printError(listIntArr1, listIntArr2);
+    }
+
+    public static void printError(int[] expected, int[] computed) {
+        printError(Arrays.toString(expected), Arrays.toString(computed));
+    }
+
+    public static void printError(boolean[] expected, boolean[] computed) {
+        printError(Arrays.toString(expected), Arrays.toString(computed));
+    }
+
+    public static void printError(boolean[][] expected, boolean[][] computed) {
+        printError(Arrays.toString(expected), Arrays.toString(computed));
+    }
+
+    public static void printError(List<int[]> expected, List<int[]> computed) {
+        System.out.println("ERROR");
+        System.out.println("Expected: " + expected
+            .stream()
+            .map(Arrays::toString)
+            .collect(Collectors.joining(", "))
+        );
+        System.out.println("Computed: " + computed
+            .stream()
+            .map(Arrays::toString)
+            .collect(Collectors.joining(", "))
+        );
+    }
+
+    public static <T> void printError(T expected, T computed) {
+        System.out.println("ERROR");
+        System.out.println("Expected: " + expected);
+        System.out.println("Computed: " + computed);
     }
 
 
@@ -1367,37 +1277,6 @@ public class Main {
                 return false;
         }
         return true;
-    }
-
-    public static void printArray(boolean[][] array) {
-        if (array != null) {
-            for (boolean[] row : array) {
-                for (boolean pixel : row) {
-                    System.out.print(pixel + ",");
-                }
-                System.out.println();
-            }
-        } else {
-            System.out.print(Arrays.deepToString(null));
-        }
-    }
-
-    public static void printArray(boolean[] array) {
-        if (array != null) {
-            for (boolean pixel : array) {
-                System.out.print(pixel + ",");
-            }
-            System.out.println();
-        } else {
-            System.out.print(Arrays.deepToString(null));
-        }
-    }
-
-    public static void printArray(int[] array) {
-        for (int pixel : array) {
-            System.out.print(pixel + ",");
-        }
-        System.out.println();
     }
 
     public static void printMinutiae(List<int[]> minutiae) {
