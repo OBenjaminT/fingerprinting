@@ -731,7 +731,7 @@ public class Main {
         }
     }
 
-    public static void testSpreadPixel() {
+    /*public static void testSpreadPixel() {
         {
             System.out.print("testSpreadPixel 1: ");
             boolean[][] image = {
@@ -913,7 +913,7 @@ public class Main {
                 printArray(clone);
             }
         }
-    }
+    }*/
 
     public static void testComputeSlope() {
         //TODO improve test

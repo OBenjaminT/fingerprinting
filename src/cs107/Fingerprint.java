@@ -276,6 +276,36 @@ public class Fingerprint {
         // it changed the pixels in place so no return
     }
 
+/*    public static boolean[][] connectedPixels(boolean[][] image, int row, int col, int distance) {
+        //TODO implement
+        boolean[][] pixelsConnectes = new boolean[image.length][image[0].length];
+        boolean[][] pixelsCopie = new boolean[image.length][image[0].length];
+        boolean[] voisinsconnecte;
+        int c = col - distance; // expression des côtés du carré
+        int l = row - distance; // idem
+        pixelsConnectes[row][col] = true;
+        while (!identical(pixelsCopie, pixelsConnectes)) {  //ne pas oublier de rester dans le carré!
+            for (int longueur = 0; longueur < image.length; ++longueur) {
+                for (int hauteur = 0; hauteur < image[0].length; ++hauteur) {
+                    pixelsCopie[longueur][hauteur] = pixelsConnectes[longueur][hauteur]; // on recopie pixelsconnecte dans pixelscopie
+                }
+            }
+            for (int j = 0; j < 2 * distance + 1; ++j) { //on scan le carré de fond en comble à l'aide de la double boucle
+                for (int k = 0; k < 2 * distance + 1; ++k) {
+                    if (c + j >= 0 && l + k >= 0 && l + k < image.length && c + j < image[0].length && image[l + k][c + j]) { // on vérifie que les valeurs étudiées ne sortent pas de l'image
+                        voisinsconnecte = getNeighbours(pixelsConnectes, l + k, c + j);
+                        if (blackNeighbours(voisinsconnecte) > 0 ) { //blackneighbours > 0; condition pour que les pixels soient connectés à la minutie
+                            pixelsConnectes[l + k][c + j] = true;
+
+
+                        }
+                    }
+                }
+            }
+        }
+        return pixelsConnectes;
+    }*/
+
     /**
      * Computes the slope of a minutia using linear regression.
      *
@@ -516,15 +546,16 @@ public class Fingerprint {
                 ++j;
             }
         }
-        if(count>=19){
+        if(count>=18){
             System.out.println(count);
-            for(int i=0; i<minutiaes.size();++i){
+            /*for(int i=0; i<minutiaes.size();++i){
                 System.out.println(minutiaes.get(i)[0]+"-"+minutiaes.get(i)[1]+"-"+minutiaes.get(i)[2]);
-            }
+            }*/
 
         }
         return count;
     }
+
 
     /**
      * Compares the minutiae from two fingerprints.
@@ -557,4 +588,32 @@ public class Fingerprint {
                             ORIENTATION_THRESHOLD
                         ) >= FOUND_THRESHOLD)));
     }
+/*    public static boolean match(List<int[]> minutiae1, List<int[]> minutiae2) {
+        //TODO implement
+        boolean resultat = false;
+        List<int[]> Minutiae2trans = new ArrayList<int[]>();
+
+        for(int[] a : minutiae1) {
+            for(int[] b : minutiae2) {
+                int ligM1 = a[0];
+                int colM1 = a[1];
+                int ligM2 = b[0];
+                int colM2 = b[1];
+                int rot = b[2]-a[2];
+
+                for (int p = rot-MATCH_ANGLE_OFFSET ; p<=rot+MATCH_ANGLE_OFFSET ; p+=1) {
+                    Minutiae2trans.clear();
+                    Minutiae2trans = applyTransformation(minutiae2 , ligM1 , colM1 , ligM2-ligM1 , colM2-colM1 , p);
+                    //System.out.println(matchingMinutiaeCount(minutiae1, Minutiae2trans, DISTANCE_THRESHOLD, ORIENTATION_THRESHOLD));
+                    if (matchingMinutiaeCount(minutiae1, Minutiae2trans, DISTANCE_THRESHOLD, ORIENTATION_THRESHOLD) >= FOUND_THRESHOLD) {
+                        int count = matchingMinutiaeCount(minutiae1, Minutiae2trans, DISTANCE_THRESHOLD, ORIENTATION_THRESHOLD);
+                        resultat = true;
+                    }
+                }
+            }
+        }
+
+
+        return resultat;
+    }*/
 }
