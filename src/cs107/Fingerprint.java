@@ -580,31 +580,16 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        var minutiaes1 = new ArrayList<String>();
-        var count = (int) minutiae1.stream()//.parallel() // for each minutia in minutiae1
+        return (int) minutiae1.stream()//.parallel() // for each minutia in minutiae1
             .filter(minutia1 -> minutiae2.stream()//.parallel()
                 .anyMatch(minutia2 -> // keep it if there is any in minutiae2 that is true below
                 { // keep it if there is any in minutiae2 that is true below
                     var a = minutia1[0] - minutia2[0]; // Pythagoras
                     var b = minutia1[1] - minutia2[1];
-                    if (
-                        Math.sqrt(a * a + b * b) <= maxDistance
-                            && Math.abs(minutia1[2] - minutia2[2]) <= maxOrientation
-                    ) {
-                        minutiaes1.add(
-                            minutia1[0] + "\t-\t" + minutia1[1] + "\t-\t-" + minutia1[2]
-                                + "\t===\t"
-                                + minutia2[0] + "\t-\t" + minutia2[1] + "\t-\t" + minutia2[2]);
-                        return true;
-                    }
-                    return false;
+                    return Math.sqrt(a * a + b * b) <= maxDistance
+                        && Math.abs(minutia1[2] - minutia2[2]) <= maxOrientation;
                 })
-            ).count(); // count how many were kept
-        //System.out.println("count: "+count);
-        //if (count >= 19) {
-        //    minutiaes1.forEach(System.out::println);
-        //}
-        return count;
+            ).count();
     }
 
     /**

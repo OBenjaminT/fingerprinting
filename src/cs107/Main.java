@@ -1224,7 +1224,21 @@ public class Main {
     }
 
     public static void printError(boolean[][] expected, boolean[][] computed) {
-        printError(Arrays.toString(expected), Arrays.toString(computed));
+        var expect = Arrays.stream(expected)
+            .map(Arrays::toString)
+            .map(i -> i + "\n")
+            .collect(Collectors.toList());
+        var compute = Arrays.stream(computed)
+            .map(Arrays::toString)
+            .map(i -> i + "\n")
+            .collect(Collectors.toList());
+        var str = new StringBuilder();
+        str.append("ERROR\n")
+            .append("Expected: \n");
+        expect.forEach(str::append);
+        str.append("Computed: \n");
+        compute.forEach(str::append);
+        System.out.println(str);
     }
 
     public static void printError(List<int[]> expected, List<int[]> computed) {
