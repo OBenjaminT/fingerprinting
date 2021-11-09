@@ -250,8 +250,8 @@ public class Fingerprint {
         // create a square clone of a subset of the image centered on the pixel and squareSideLength wide
         var clone = subClone(
             image,
-            row - distance, // new center of sub image
-            col - distance,
+            row - distance + 1, // new center of sub image
+            col - distance - 1, // WTF?
             squareSideLength
         );
         // set an empty array with the same center pixel as in clone
@@ -439,9 +439,8 @@ public class Fingerprint {
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
         var connectedPixels = connectedPixels(image, row, col, distance);
-        var center = distance / 2;
-        var slope = computeSlope(connectedPixels, center, center);
-        var angle = computeAngle(connectedPixels, center, center, slope);
+        var slope = computeSlope(connectedPixels, distance, distance);
+        var angle = computeAngle(connectedPixels, distance, distance, slope);
         var angleDegrees = (int) Math.round(Math.toDegrees(angle));
         return angleDegrees < 0 ? angleDegrees + 360 : angleDegrees;
     }
@@ -457,30 +456,13 @@ public class Fingerprint {
      */
     public static @NotNull List<int[]> extract(boolean[][] image) {
         var minutiaes = new ArrayList<int[]>();
-        var minutia = new int[3];
-        var thinImage = thin(image); // thin the image
-        for (int i = 1; i < thinImage.length - 1; i++) // for each pixel excluding the outer edge
-            for (int j = 1; j < thinImage[i].length - 1; j++)
-                if (thinImage[i][j]) { // if it's part of the fingerprint
-                    var neighbors = getNeighbours(thinImage, i, j);
-                    assert neighbors != null;
-                    var transitions = transitions(neighbors);
-                    if (transitions == 3 || transitions == 1) { // if it's a minutia
-                        minutia = new int[]{i, j, computeOrientation(thinImage, i, j, ORIENTATION_DISTANCE)};
-                        minutiaes.add(minutia); // add it to the list
-                    }
-                }
-        return minutiaes;
-        /* TODO
-        var minutiaes = new ArrayList<int[]>();
-        var thinImage = thin(image); // thin the image
         IntStream
-            .range(1, thinImage.length - 1) // for each pixel excluding the outer edge
+            .range(1, image.length - 1) // for each pixel excluding the outer edge
             .forEach(row -> IntStream
-                .range(1, thinImage[0].length - 1)
-                .filter(col -> thinImage[row][col]) // if it's part of the fingerprint (i.e. true)
+                .range(1, image[0].length - 1)
+                .filter(col -> image[row][col]) // if it's part of the fingerprint (i.e. true)
                 .filter(col -> { // if it's a minutia
-                    var neighbors = getNeighbours(thinImage, row, col);
+                    var neighbors = getNeighbours(image, row, col);
                     assert neighbors != null;
                     var transitions = transitions(neighbors);
                     return transitions == 3 || transitions == 1;
@@ -489,11 +471,10 @@ public class Fingerprint {
                     minutiaes.add(new int[]{
                         row,
                         col,
-                        computeOrientation(thinImage, row, col, ORIENTATION_DISTANCE)
+                        computeOrientation(image, row, col, ORIENTATION_DISTANCE)
                     })
                 ));
         return minutiaes;
-         */
     }
 
     /**
@@ -599,25 +580,30 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        var minutiaes = new ArrayList<String>();
+        var minutiaes1 = new ArrayList<String>();
         var count = (int) minutiae1.stream()//.parallel() // for each minutia in minutiae1
             .filter(minutia1 -> minutiae2.stream()//.parallel()
                 .anyMatch(minutia2 -> // keep it if there is any in minutiae2 that is true below
-                    { // keep it if there is any in minutiae2 that is true below
-                        var a = minutia1[0] - minutia2[0]; // Pythagoras
-                        var b = minutia1[1] - minutia2[1];
-                        if (
-                            Math.sqrt(a * a + b * b) <= maxDistance
+                { // keep it if there is any in minutiae2 that is true below
+                    var a = minutia1[0] - minutia2[0]; // Pythagoras
+                    var b = minutia1[1] - minutia2[1];
+                    if (
+                        Math.sqrt(a * a + b * b) <= maxDistance
                             && Math.abs(minutia1[2] - minutia2[2]) <= maxOrientation
-                        ){
-                            minutiaes.add(minutia1[0] + "-" + minutia1[1] + "-" + minutia1[2]);
-                            return true;
-                        }
-                        return false;
-                    })
+                    ) {
+                        minutiaes1.add(
+                            minutia1[0] + "\t-\t" + minutia1[1] + "\t-\t-" + minutia1[2]
+                                + "\t===\t"
+                                + minutia2[0] + "\t-\t" + minutia2[1] + "\t-\t" + minutia2[2]);
+                        return true;
+                    }
+                    return false;
+                })
             ).count(); // count how many were kept
-        System.out.println("count: "+count);
-        minutiaes.forEach(System.out::println);
+        //System.out.println("count: "+count);
+        //if (count >= 19) {
+        //    minutiaes1.forEach(System.out::println);
+        //}
         return count;
     }
 
