@@ -23,7 +23,7 @@ public class Main {
 
         // Tested and Passing
 
-        testGetNeighbours();
+        /*testGetNeighbours();
         testBlackNeighbours();
         testTransitions();
         testIdentical();

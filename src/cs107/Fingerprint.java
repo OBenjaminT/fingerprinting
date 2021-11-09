@@ -5,6 +5,8 @@ package cs107;
 - java.util.Arrays;
 */
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -495,17 +497,31 @@ public class Fingerprint {
                                 Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) + (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
                                         && Math.abs(i[2] - j[2]) <= maxOrientation))
                 .count(); // count how many were kept*/
+        ArrayList<Integer[]> minutiaes = new ArrayList<Integer[]>(); //list of minutiaes that matched
         int count=0;
-        for(int i =0; i<minutiae1.size(); ++i){
-            for(int j=0; j<minutiae2.size(); ++j){
-                if(Math.sqrt((minutiae1.get(i)[0] - minutiae2.get(j)[0]) * (minutiae1.get(i)[0] - minutiae2.get(j)[0]) + (minutiae1.get(i)[1] - minutiae2.get(j)[1]) * (minutiae1.get(i)[1] - minutiae2.get(j)[1])) <= maxDistance
-                        && Math.abs(minutiae1.get(i)[2] - minutiae2.get(j)[2]) <= maxOrientation){
+        for(int i =0; i<minutiae1.size(); ++i) {
+            int j = 0;
+            boolean bol = true;
+            while (bol && j < minutiae2.size()) {
+                Integer[] minutiae = new Integer[3]; //contains the row and column of the minutiae 1 that mathched
+                if (Math.sqrt((minutiae1.get(i)[0] - minutiae2.get(j)[0]) * (minutiae1.get(i)[0] - minutiae2.get(j)[0]) + (minutiae1.get(i)[1] - minutiae2.get(j)[1]) * (minutiae1.get(i)[1] - minutiae2.get(j)[1])) <= maxDistance
+                        && Math.abs(minutiae1.get(i)[2] - minutiae2.get(j)[2]) <= maxOrientation) {
                     ++count;
+                    bol = false;
+                    minutiae[0] = minutiae1.get(i)[0];
+                    minutiae[1] = minutiae1.get(i)[1];
+                    minutiae[2] = minutiae1.get(i)[2];
+                    minutiaes.add(minutiae);
                 }
+                ++j;
             }
         }
         if(count>=19){
             System.out.println(count);
+            for(int i=0; i<minutiaes.size();++i){
+                System.out.println(minutiaes.get(i)[0]+"-"+minutiaes.get(i)[1]+"-"+minutiaes.get(i)[2]);
+            }
+
         }
         return count;
     }
