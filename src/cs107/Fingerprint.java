@@ -273,7 +273,35 @@ public class Fingerprint {
         if (leftColumnInImage && topRowInImage) subsetClone[row - 1][col - 1] = imageSubset[row - 1][col - 1];
         // it changed the pixels in place so no return
     }
+/*    public static boolean[][] connectedPixels(boolean[][] image, int row, int col, int distance) {
+        //TODO implement
+        boolean[][] pixelsConnectes = new boolean[image.length][image[0].length];
+        boolean[][] pixelsCopie = new boolean[image.length][image[0].length];
+        boolean[] voisinsconnecte;
+        int c = col - distance; // expression des côtés du carré
+        int l = row - distance; // idem
+        pixelsConnectes[row][col] = true;
+        while (!identical(pixelsCopie, pixelsConnectes)) {  //ne pas oublier de rester dans le carré!
+            for (int longueur = 0; longueur < image.length; ++longueur) {
+                for (int hauteur = 0; hauteur < image[0].length; ++hauteur) {
+                    pixelsCopie[longueur][hauteur] = pixelsConnectes[longueur][hauteur]; // on recopie pixelsconnecte dans pixelscopie
+                }
+            }
+            for (int j = 0; j < 2 * distance + 1; ++j) { //on scan le carré de fond en comble à l'aide de la double boucle
+                for (int k = 0; k < 2 * distance + 1; ++k) {
+                    if (c + j >= 0 && l + k >= 0 && l + k < image.length && c + j < image[0].length && image[l + k][c + j]) { // on vérifie que les valeurs étudiées ne sortent pas de l'image
+                        voisinsconnecte = getNeighbours(pixelsConnectes, l + k, c + j);
+                        if (blackNeighbours(voisinsconnecte) > 0 ) { //blackneighbours > 0; condition pour que les pixels soient connectés à la minutie
+                            pixelsConnectes[l + k][c + j] = true;
 
+
+                        }
+                    }
+                }
+            }
+        }
+        return pixelsConnectes;
+    }*/
     /**
      * Computes the slope of a minutia using linear regression.
      *
@@ -358,8 +386,8 @@ public class Fingerprint {
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
         var connectedPixels = connectedPixels(image, row, col, distance);
-        var slope = computeSlope(connectedPixels, distance, distance);
-        var angle = computeAngle(connectedPixels, distance, distance, slope);
+        var slope = computeSlope(connectedPixels, row  , col);
+        var angle = computeAngle(connectedPixels, row, col, slope);
         var angleDegrees = (int) Math.round(Math.toDegrees(angle));
         return angleDegrees < 0 ? angleDegrees + 360 : angleDegrees;
     }
@@ -495,17 +523,36 @@ public class Fingerprint {
                                 Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) + (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
                                         && Math.abs(i[2] - j[2]) <= maxOrientation))
                 .count(); // count how many were kept*/
+        ArrayList<Integer[]> minutiaes = new ArrayList<Integer[]>(); //list of minutiaes that matched
         int count=0;
         for(int i =0; i<minutiae1.size(); ++i){
-            for(int j=0; j<minutiae2.size(); ++j){
+            int j=0;
+            boolean bol= true;
+            while(bol&& j<minutiae2.size()){
+                Integer[]minutiae=new Integer[3]; //contains the row and column of the minutiae 1 that mathched
+                if(Math.sqrt((minutiae1.get(i)[0] - minutiae2.get(j)[0]) * (minutiae1.get(i)[0] - minutiae2.get(j)[0]) + (minutiae1.get(i)[1] - minutiae2.get(j)[1]) * (minutiae1.get(i)[1] - minutiae2.get(j)[1])) <= maxDistance
+                        && Math.abs(minutiae1.get(i)[2] - minutiae2.get(j)[2]) <= maxOrientation){
+                    ++count;
+                    bol=false;
+                    minutiae[0]=minutiae1.get(i)[0];
+                    minutiae[1]=minutiae1.get(i)[1];
+                    minutiae[2]=minutiae1.get(i)[2];
+                    minutiaes.add(minutiae);
+                }
+                ++j;
+            }
+            /*for(int j=0; j<minutiae2.size(); ++j){
                 if(Math.sqrt((minutiae1.get(i)[0] - minutiae2.get(j)[0]) * (minutiae1.get(i)[0] - minutiae2.get(j)[0]) + (minutiae1.get(i)[1] - minutiae2.get(j)[1]) * (minutiae1.get(i)[1] - minutiae2.get(j)[1])) <= maxDistance
                         && Math.abs(minutiae1.get(i)[2] - minutiae2.get(j)[2]) <= maxOrientation){
                     ++count;
                 }
-            }
+            }*/
         }
         if(count>=19){
             System.out.println(count);
+            for(int i=0; i<minutiaes.size();++i){
+                System.out.println(minutiaes.get(i)[0]+"-"+minutiaes.get(i)[1]+"-"+minutiaes.get(i)[2]);
+            }
         }
         return count;
     }

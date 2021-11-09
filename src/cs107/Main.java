@@ -19,7 +19,9 @@ public class Main {
         //---------------------------
         // Tests functions separately
         //---------------------------
-
+        testCompareFingerprints("1_5", "2_3", false);
+        //testDrawSkeleton("1_1"); //draw minutiae of fingerprint 1_1.png
+        //testDrawSkeleton("1_2"); //draw minutiae of fingerprint 1_2.png
         // Tested and Passing
         /*testGetNeighbours();
         testBlackNeighbours();
@@ -30,7 +32,7 @@ public class Main {
         testSpreadPixel();*/
         //testSubClone();
         //testmatchingMinutiaeCount();
-
+        //testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
         // passing but more tests recommended
 /*        testThin();
         testComputeSlope();
@@ -39,7 +41,14 @@ public class Main {
         testApplyRotation();
         testApplyTranslation();*/
         //testCompareFingerprints("1_1", "1_3", true);
-        testCompareFingerprints("1_5", "2_3", true);
+        //testCompareFingerprints("1_2", "1_4", false);
+        //testCompareFingerprints("1_5", "2_2", false);
+        //testCompareFingerprints("1_5", "2_3", false);
+        //testCompareFingerprints("1_5", "2_4", false);
+        //testCompareFingerprints("1_5", "2_5", false);
+        //testCompareFingerprints("1_5", "2_6", false);
+        //testCompareFingerprints("1_5", "2_7", false);
+        //testCompareFingerprints("1_5", "2_8", false);
         //testCompareFingerprints("1_5" , "14_7", false);
         /*
         // buggy test?
@@ -49,7 +58,7 @@ public class Main {
 
 
         testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
-        //testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
+        testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
         //testDrawSkeleton("2_1"); //draw skeleton of fingerprint 2_1.png
 
         //testDrawMinutiae("1_1"); //draw minutiae of fingerprint 1_1.png
@@ -729,7 +738,7 @@ public class Main {
         }
     }
 
-    public static void testSpreadPixel() {
+    /*public static void testSpreadPixel() {
         {
             System.out.print("testSpreadPixel 1: ");
             boolean[][] image = {
@@ -814,9 +823,9 @@ public class Main {
                 printArray(relevant);
             }
         }
-    }
+    }*/
 
-    public static void testSubClone() {
+    /*public static void testSubClone() {
         {
             System.out.print("testSubClone1: ");
             boolean[][] image = {
@@ -912,7 +921,7 @@ public class Main {
             }
         }
     }
-
+*/
     public static void testComputeSlope() {
         //TODO improve test
         {
