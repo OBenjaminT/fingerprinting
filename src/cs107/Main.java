@@ -25,27 +25,77 @@ public class Main {
 
         // Tested and Passing
 
-        testGetNeighbours();
-        testBlackNeighbours();
-        testTransitions();
-        testIdentical();
-        testThinningStep();
-        testConnectedPixels();
-        testSpreadPixel();
-        testSubClone();
-        testMatchingMinutiaeCount();
+        //testGetNeighbours();
+        //testBlackNeighbours();
+        //testTransitions();
+        //testIdentical();
+        //testThinningStep();
+        //testConnectedPixels();
+        //testSpreadPixel();
+        //testSubClone();
+        //testMatchingMinutiaeCount();
 
         // passing but more tests recommended
-        testThin();
-        testComputeSlope();
-        testComputeAngle();
-        testComputeOrientation();
-        testApplyRotation();
-        testApplyTranslation();
-        testCompareFingerprints("1_1", "1_3", true);
-        testCompareFingerprints("1_5", "2_3", true);
-        testCompareFingerprints("1_5", "14_7", false);
-        testCompareFingerprints("1_1", "1_6", false); // 20
+        //testThin();
+        //testComputeSlope();
+        //testComputeAngle();
+        //testComputeOrientation();
+        //testApplyRotation();
+        //testApplyTranslation();
+
+        //testCompareFingerprints("1_1", "1_3", true);
+        //testCompareFingerprints("1_5", "2_3", true);
+        //testCompareFingerprints("1_5", "14_7", false);
+        //testCompareFingerprints("1_1", "1_6", false); // 20
+
+
+        boolean[][] image1 = Helper.readBinary("src/resources/fingerprints/" + "1_5" + ".png");
+        assert image1 != null;
+        boolean[][] skeleton1 = Fingerprint.thin(image1);
+        List<int[]> minutiae1 = Fingerprint.extract(skeleton1);
+
+        boolean[][] image2 = Helper.readBinary("src/resources/fingerprints/" + "2_3" + ".png");
+        assert image2 != null;
+        boolean[][] skeleton2 = Fingerprint.thin(image2);
+        List<int[]> minutiae2 = Fingerprint.extract(skeleton2);
+
+        Fingerprint.matchingMinutiaeCount(
+            minutiae1,
+            Fingerprint.applyTransformation(
+                minutiae2,
+                320,
+                185,
+                -1,
+                1,
+                1
+            ),
+            Fingerprint.DISTANCE_THRESHOLD,
+            Fingerprint.ORIENTATION_THRESHOLD
+        );
+
+        /*
+29-31-348       |   14-45-347       |   14-45-23
+65-11-4         |   25-185-337      |   25-185-156
+111-1-10        |   49-15-353       |   29-31-23
+133-1-3         |   77-9-0          |   49-15-32
+184-99-304      |   111-1-10        |   65-11-43
+319-80-5        |   121-1-3         |   121-1-46
+320-120-5       |   273-94-275      |   133-1-50
+320-162-5       |   320-120-5       |   319-80-57
+320-185-8       |   320-162-5       |   319-208-76
+321-11-4        |   320-185-8       |   320-120-65
+321-64-6        |   321-11-4        |   320-162-64
+321-87-3        |   321-64-6        |   320-185-71
+321-108-3       |   321-87-3        |   321-11-56
+321-127-1       |   321-108-3       |   321-64-46
+321-137-4       |   321-127-1       |   321-87-53
+321-149-6       |   321-137-4       |   321-108-57
+321-195-358     |   321-149-6       |   321-127-55
+
+321-137-55
+321-149-60
+321-195-66
+        */
 
         // buggy test?
         //testExtract();
@@ -85,7 +135,13 @@ public class Main {
         System.out.println(correct);
         */
 
-        // random check
+        //testRandomComparisons();
+        //testSuccessComparisons();
+        //testFailComparisons();
+    }
+
+    // General testing utilities
+    public static void testRandomComparisons() {
         var randomCheck = new Random()
             .ints(1, 17)
             .limit(4).parallel() // for each fingerprint
@@ -108,8 +164,9 @@ public class Main {
                 .sum())
             .sum();
         System.out.println(randomCheck + " / 8");
+    }
 
-        /*
+    public static void testSuccessComparisons() {
         long successTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
             .mapToLong(f1 -> IntStream
@@ -117,15 +174,17 @@ public class Main {
                 .mapToLong(v1 -> IntStream
                     .range(v1 + 1, 9).parallel() // go through subsequent version of the fingerprint
                     .mapToObj(v2 -> testCompareFingerprints( // compare them and expect them to match
-                        Integer.toString(f1) + "_" + Integer.toString(v1),
-                        Integer.toString(f1) + "_" + Integer.toString(v2),
+                        f1 + "_" + v1,
+                        f1 + "_" + v2,
                         true))
                     .filter(i -> i) // keep all of the correct results
                     .count()) // count them
                 .sum())
             .sum(); // count how many overall were as expected
-        */
-        /*
+        System.out.println("Intended successes: " + successTests);
+    }
+
+    public static void testFailComparisons() {
         long failTests = IntStream
             .range(1, 17).parallel() // for each fingerprint
             .mapToLong(f1 -> IntStream
@@ -135,18 +194,17 @@ public class Main {
                     .mapToLong(v1 -> IntStream
                         .range(1, 9).parallel() // and each version of the second fingerprint
                         .mapToObj(v2 -> testCompareFingerprints( // compare them, and don't expect them to match
-                            Integer.toString(f1) + "_" + Integer.toString(v1),
-                            Integer.toString(f2) + "_" + Integer.toString(v2),
+                            f1 + "_" + v1,
+                            f2 + "_" + v2,
                             false))
-                        .filter(i -> i) // keep all of the correct results
+                        .filter(i -> i) // keep all the correct results
                         .count()) // count them
                     .sum())
                 .sum())
             .sum(); // count how many overall were as expected
-        */
-
-        // System.out.println(failTests + successTests);*/
+        System.out.println("Intended failures: " + failTests);
     }
+
 
     public static void testGetNeighbours() {
         {
@@ -892,6 +950,7 @@ public class Main {
     public static void testComputeOrientation() {
         // TODO more tests
         {
+            System.out.print("test ComputeOrientation 1: ");
             boolean[][] image = {
                 {false, false, false, true, false},
                 {false, false, true, true, false},
@@ -901,7 +960,7 @@ public class Main {
             double expected = Math.round(Math.toDegrees(Math.atan(0.7)));
             double angle = Fingerprint.computeOrientation(image, 2, 1, 30);
             if (angle == expected) {
-                System.out.println("test ComputeOrientation 1: OK");
+                System.out.println("OK");
             } else {
                 printError(expected, angle);
             }

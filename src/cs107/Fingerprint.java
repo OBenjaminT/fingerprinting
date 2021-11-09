@@ -246,7 +246,7 @@ public class Fingerprint {
      * <code>(row, col)</code>.
      */
     public static boolean @NotNull [][] connectedPixels(boolean[][] image, int row, int col, int distance) {
-        int squareSideLength = 2 * distance + 1;
+        int squareSideLength = (2 * distance) + 1;
         // create a square clone of a subset of the image centered on the pixel and squareSideLength wide
         var clone = subClone(
             image,
@@ -398,18 +398,6 @@ public class Fingerprint {
         // atomics because they're used in a lambda expression below
         var pixelsAbove = new AtomicInteger();
         var pixelsUnder = new AtomicInteger();
-
-        for (int i = 0; i < connectedPixels.length; i++) // for each pixel
-            for (int j = 0; j < connectedPixels[i].length; j++)
-                if (connectedPixels[i][j] && !(i == row && j == col)) { // if it's not the origin and it's true
-                    int x = j - col; // make its coordinates relative to the new origin
-                    int y = row - i;
-                    if (y >= -1 / slope * x)
-                        pixelsAbove.getAndIncrement(); // if it's above the normal increment pixelsAbove
-                    else pixelsUnder.getAndIncrement(); // if not increment pixels below
-                }
-
-        /* TODO
         IntStream
             .range(0, connectedPixels.length) // for each row
             .forEach(rowIndex -> IntStream
@@ -427,7 +415,6 @@ public class Fingerprint {
                     else
                         pixelsUnder.getAndIncrement(); // if not increment pixels below
                 }));
-         */
 
         if (slope == Double.POSITIVE_INFINITY) // if the line is vertical
             return (pixelsAbove.get() > pixelsUnder.get() ? Math.PI : -Math.PI) / 2; // return either up or down
@@ -452,7 +439,7 @@ public class Fingerprint {
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
         var connectedPixels = connectedPixels(image, row, col, distance);
-        var center = (distance - 1) / 2;
+        var center = distance / 2;
         var slope = computeSlope(connectedPixels, center, center);
         var angle = computeAngle(connectedPixels, center, center, slope);
         var angleDegrees = (int) Math.round(Math.toDegrees(angle));
@@ -612,40 +599,25 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        /* TODO
-        return (int) minutiae1.stream().parallel() // for each minutia in minutiae1
-            .filter(i -> minutiae2.stream().parallel()
-                .anyMatch(j -> // keep it if there is any in minutiae2 that is true below
-                    Math.sqrt((i[0] - j[0]) * (i[0] - j[0]) + (i[1] - j[1]) * (i[1] - j[1])) <= maxDistance
-                        && Math.abs(i[2] - j[2]) <= maxOrientation
-                )
+        var minutiaes = new ArrayList<String>();
+        var count = (int) minutiae1.stream()//.parallel() // for each minutia in minutiae1
+            .filter(minutia1 -> minutiae2.stream()//.parallel()
+                .anyMatch(minutia2 -> // keep it if there is any in minutiae2 that is true below
+                    { // keep it if there is any in minutiae2 that is true below
+                        var a = minutia1[0] - minutia2[0]; // Pythagoras
+                        var b = minutia1[1] - minutia2[1];
+                        if (
+                            Math.sqrt(a * a + b * b) <= maxDistance
+                            && Math.abs(minutia1[2] - minutia2[2]) <= maxOrientation
+                        ){
+                            minutiaes.add(minutia1[0] + "-" + minutia1[1] + "-" + minutia1[2]);
+                            return true;
+                        }
+                        return false;
+                    })
             ).count(); // count how many were kept
-        */
-        var minutiaes = new ArrayList<Integer[]>(); //list of minutiaes that matched
-        int count = 0;
-        for (int[] ints : minutiae1) {
-            int j = 0;
-            boolean bol = true;
-            while (bol && j < minutiae2.size()) {
-                Integer[] minutiae = new Integer[3]; //contains the row and column of the minutiae 1 that matched
-                if (Math.sqrt((ints[0] - minutiae2.get(j)[0]) * (ints[0] - minutiae2.get(j)[0]) + (ints[1] - minutiae2.get(j)[1]) * (ints[1] - minutiae2.get(j)[1])) <= maxDistance
-                    && Math.abs(ints[2] - minutiae2.get(j)[2]) <= maxOrientation) {
-                    ++count;
-                    bol = false;
-                    minutiae[0] = ints[0];
-                    minutiae[1] = ints[1];
-                    minutiae[2] = ints[2];
-                    minutiaes.add(minutiae);
-                }
-                ++j;
-            }
-        }
-        if (count >= 19) {
-            System.out.println(count);
-            for (Integer[] minutia : minutiaes) {
-                System.out.println(minutia[0] + "-" + minutia[1] + "-" + minutia[2]);
-            }
-        }
+        System.out.println("count: "+count);
+        minutiaes.forEach(System.out::println);
         return count;
     }
 
