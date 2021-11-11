@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
  * Provides tools to compare fingerprint.
  */
 public class Fingerprint {
-
+                                                                                    
     /**
      * The number of pixels to consider in each direction when doing the linear
      * regression to compute the orientation.
