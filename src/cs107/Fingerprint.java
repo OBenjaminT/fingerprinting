@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -19,29 +20,29 @@ public class Fingerprint {
      * The number of pixels to consider in each direction when doing the linear
      * regression to compute the orientation.
      */
-    public static final int ORIENTATION_DISTANCE = 16;
+    public static int ORIENTATION_DISTANCE = 16;
 
     /**
      * The maximum distance between two minutiae to be considered matching.
      */
-    public static final int DISTANCE_THRESHOLD = 5;
+    public static int DISTANCE_THRESHOLD = 5;
 
     /**
      * The number of matching minutiae needed for two fingerprints to be considered
      * identical.
      */
-    public static final int FOUND_THRESHOLD = 20;
+    public static int FOUND_THRESHOLD = 20;
 
     /**
      * The distance between two angle to be considered identical.
      */
-    public static final int ORIENTATION_THRESHOLD = 20;
+    public static int ORIENTATION_THRESHOLD = 20;
 
     /**
      * The offset in each direction for the rotation to test when doing the
      * matching.
      */
-    public static final int MATCH_ANGLE_OFFSET = 2;
+    public static int MATCH_ANGLE_OFFSET = 2;
 
     /**
      * Returns an array containing the value of the 8 neighbours of the pixel at
@@ -134,7 +135,7 @@ public class Fingerprint {
         return IntStream
             .range(0, neighbours.length) // for each valid index of neighbours
             .map(index -> // turns every index into a 1 if neighbours[i] is false AND neighbours[index + 1] is true
-                !neighbours[index] && neighbours[(index + 1) % neighbours.length] ? 1 : 0
+                (!neighbours[index] && neighbours[(index + 1) % neighbours.length]) ? 1 : 0
             ) // (% allows index wrap around)
             .sum(); // sum how many 1s there are in the list
     }
@@ -173,10 +174,11 @@ public class Fingerprint {
      * applying the thinning algorithm.
      */
     public static boolean @NotNull [][] thin(boolean @NotNull [][] image) {
-        boolean[][] previous = new boolean[image.length][image[0].length]; // define the dimensions of the image
+        boolean[][] previous; // define the dimensions of the image
         do {
+            previous = Arrays.stream(image).map(boolean[]::clone).toArray(boolean[][]::new);
             for (int row = 0; row < image.length; row++) // store the image's current state
-                System.arraycopy(image[row], 0, previous[row], 0, image[row].length);
+                previous[row] = image[row].clone();
             image = thinningStep(thinningStep(image, 0), 1); // run both thinning steps
         } while (!identical(previous, image)); // repeat if there was a change
         return image;
@@ -197,39 +199,25 @@ public class Fingerprint {
             .forEach(row -> IntStream
                 .range(0, image[0].length) // for each valid index of image[0] (cols)
                 //.parallel() // process each column simultaneously
-                .forEach(col -> // set newImage[row][col] = to the new pixels after seeing if they should stay
-                    newImage[row][col] = pixelSurvivalCriteria(image, step, row, col)
+                .filter(col -> image[row][col]) // if the pixel is white it doesn't change
+                .forEach(col -> {// set newImage[row][col] = to the new pixels after seeing if they should stay
+                        boolean[] neighbours = getNeighbours(image, row, col); // simplifies the logic below
+                        // @formatter:off
+                    // if any condition is true the pixel stays true
+                    newImage[row][col] = neighbours == null
+                        || blackNeighbours(neighbours) <= 1
+                        || blackNeighbours(neighbours) >= 7
+                        || transitions(neighbours) != 1
+                        || (step != 0
+                                || (IntStream.of(2, 4).allMatch(i -> neighbours[i])
+                                    && IntStream.of(0, 6).anyMatch(i -> neighbours[i]))
+                            ) && (step != 1
+                                || (IntStream.of(0, 6).allMatch(i -> neighbours[i])
+                                    && IntStream.of(2, 4).anyMatch(i -> neighbours[i])));
+                    // @formatter:on
+                    }
                 ));
         return newImage;
-    }
-
-    /**
-     * Internal method used by {@link #thinningStep(boolean[][], int)}.
-     * <p>
-     * Given a particular pixel and a step, returns true if that pixel "survives" the step or not.
-     *
-     * @param image array containing each pixel's boolean value.
-     * @param step  the step to apply, Step 0 or Step 1.
-     * @param col   the column number of the pixel in question.
-     * @param row   the row number of the pixel in question.
-     * @return A new array containing each pixel's value after the step.
-     */
-    public static boolean pixelSurvivalCriteria(boolean[][] image, int step, int row, int col) {
-        boolean[] neighbours = getNeighbours(image, row, col); // simplifies the logic below
-        // @formatter:off
-        return image[row][col] // if the pixel is black it stays black (image[i][j] && ...) == false
-            && !(neighbours != null // if all the below is true the pixel should be false -> !(...)
-                && blackNeighbours(neighbours) > 1
-                && blackNeighbours(neighbours) < 7
-                && transitions(neighbours) == 1
-                && (step == 0 // either the step0 conditions are true
-                        && (!neighbours[0] || !neighbours[2] || !neighbours[4])
-                        && (!neighbours[2] || !neighbours[4] || !neighbours[6])
-                    || step == 1 // or the step1 conditions are true
-                        && (!neighbours[0] || !neighbours[2] || !neighbours[6])
-                        && (!neighbours[0] || !neighbours[4] || !neighbours[6])
-                    ));
-        // @formatter:on
     }
 
     /**
@@ -254,79 +242,67 @@ public class Fingerprint {
             squareSideLength
         );
         // set an empty array with the same center pixel as in clone
-        var relevant = new boolean[squareSideLength][squareSideLength];
+        boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
         relevant[distance][distance] = image[row][col];
-
         boolean[][] previousArray; // declared outside of loop scope so that it can be used in the check
         do {
-            previousArray = ArrayCloneSquare(relevant, squareSideLength); // clone relevant to remember it
+            previousArray = subClone(relevant, 0, 0, squareSideLength); // clone relevant to remember it
             IntStream
                 .range(0, squareSideLength) // for each row
-                //.parallel()
                 .forEach(rowIndex -> IntStream
                     .range(0, squareSideLength) // for each column
-                    //.parallel()
                     .forEach(colIndex -> // make every pixel "infect" its true neighbours if it is true
-                        spreadPixel(clone, relevant, rowIndex, colIndex)
-                    ));
+                    spreadCentrePixel(clone, relevant, rowIndex, colIndex)
+                ));
         } while (!identical(previousArray, relevant)); // repeat if there was a change
         return relevant;
     }
 
-    static boolean @NotNull [][] ArrayCloneSquare(boolean[][] image, int width) {
-        return subClone(image, 0, 0, width); // preset to clone a square array
-    }
-
-    static boolean @NotNull [][] subClone(boolean[][] image, int topLeftRow, int topLeftCol, int width) {
-        boolean[][] clone = new boolean[width][width];
+    static boolean @NotNull [][] subClone(boolean @NotNull [][] image, int topLeftRow, int topLeftCol, int width) {
+        final boolean[][] clone = new boolean[width][width];
         IntStream
-            .range(0, width) // for each row
-            .map(row -> row + topLeftRow) // shift to the location in the original
-            .forEach(row -> IntStream
-                .range(0, width) // for each column
-                .map(col -> col + topLeftCol) // shift to the location in the original
-                // keep only those that are actually in the image
-                .filter(col -> row >= 0
-                    && row < image.length
-                    && col >= 0
-                    && col < image[0].length
-                )
-                // assign the values to the clone's equivalent
-                .forEach(col -> clone[row - topLeftRow][col - topLeftCol] = image[row][col]));
+            .range(Math.max(0, topLeftRow), Math.min(image.length, topLeftRow + width))
+            .forEach(row ->
+                System.arraycopy(
+                    image[row],
+                    Math.max(0, topLeftCol),
+                    clone[row - topLeftRow],
+                    Math.abs(Math.min(0, topLeftCol)),
+                    Math.min(image[row].length, topLeftCol + width) - Math.max(0, topLeftCol)
+                ));
         return clone;
     }
 
 
-    static void spreadPixel(boolean[][] imageSubset, boolean[][] subsetClone, int row, int col) {
+    static void spreadCentrePixel(boolean @NotNull [][] image, boolean [][] relevant, int rowIndex, int colIndex) {
         // check if pixel is in the image bounds
-        if (row < 0
-            || row >= imageSubset.length
-            || col < 0
-            || col >= imageSubset[0].length
+        if (rowIndex < 0
+            || rowIndex >= image.length
+            || colIndex < 0
+            || colIndex >= image[0].length
         ) return;
 
-        if (!subsetClone[row][col]) return; // if the pixel is false it doesn't spread
+        if (!relevant[rowIndex][colIndex]) return; // if the pixel is false it doesn't spread
 
         // check which of the sides of the 3x3 around the pixel are inbounds
         // @formatter:off
-        boolean topRowInImage      = (row > 0);
-        boolean rightColumnInImage = (col < (imageSubset[0].length - 1));
-        boolean bottomRowInImage   = (row < (imageSubset.length - 1));
-        boolean leftColumnInImage  = (col > 0);
+        var topRowInImage      = (rowIndex > 0                    );
+        var rightColumnInImage = (colIndex < (image[0].length - 1));
+        var bottomRowInImage   = (rowIndex < (image.length - 1)   );
+        var leftColumnInImage  = (colIndex > 0                    );
 
         // for each pixel: if it's inbounds and true in the original image, make it true
-        // if statements instead of ternary operators (as in getNeighbours) because the subsetClone
-        // indexes also have to be inbounds
-        if (topRowInImage                           ) subsetClone[row - 1][col    ] = imageSubset[row - 1][col    ];
-        if (topRowInImage      && rightColumnInImage) subsetClone[row - 1][col + 1] = imageSubset[row - 1][col + 1];
-        if (rightColumnInImage                      ) subsetClone[row    ][col + 1] = imageSubset[row    ][col + 1];
-        if (rightColumnInImage && bottomRowInImage  ) subsetClone[row + 1][col + 1] = imageSubset[row + 1][col + 1];
-        if (bottomRowInImage                        ) subsetClone[row + 1][col    ] = imageSubset[row + 1][col    ];
-        if (bottomRowInImage   && leftColumnInImage ) subsetClone[row + 1][col - 1] = imageSubset[row + 1][col - 1];
-        if (leftColumnInImage                       ) subsetClone[row    ][col - 1] = imageSubset[row    ][col - 1];
-        if (leftColumnInImage  && topRowInImage     ) subsetClone[row - 1][col - 1] = imageSubset[row - 1][col - 1];
+        // if statements instead of ternary operators (as in getNeighbours) because
+        // the subsetClone indexes also have to be inbounds
+        if (topRowInImage                           ) relevant[rowIndex - 1][colIndex    ] = image[rowIndex - 1][colIndex    ];
+        if (topRowInImage      && rightColumnInImage) relevant[rowIndex - 1][colIndex + 1] = image[rowIndex - 1][colIndex + 1];
+        if (rightColumnInImage                      ) relevant[rowIndex    ][colIndex + 1] = image[rowIndex    ][colIndex + 1];
+        if (rightColumnInImage && bottomRowInImage  ) relevant[rowIndex + 1][colIndex + 1] = image[rowIndex + 1][colIndex + 1];
+        if (bottomRowInImage                        ) relevant[rowIndex + 1][colIndex    ] = image[rowIndex + 1][colIndex    ];
+        if (bottomRowInImage   && leftColumnInImage ) relevant[rowIndex + 1][colIndex - 1] = image[rowIndex + 1][colIndex - 1];
+        if (leftColumnInImage                       ) relevant[rowIndex    ][colIndex - 1] = image[rowIndex    ][colIndex - 1];
+        if (leftColumnInImage  && topRowInImage     ) relevant[rowIndex - 1][colIndex - 1] = image[rowIndex - 1][colIndex - 1];
         // @formatter:on
-        // it changed the pixels in place so no return
     }
 
     /**
@@ -343,30 +319,16 @@ public class Fingerprint {
         var yValues = new ArrayList<Integer>();
 
         IntStream
-            .range(0, connectedPixels.length)
-            .forEach(i -> IntStream
-                .range(0, connectedPixels[0].length)
-                .forEach(j -> {
-                        if (connectedPixels[i][j] && !(i == row && j == col)) { // if it's true and not the origin
-                            int x = j - col; // make its coordinates relative to the new origin
-                            int y = row - i;
-                            xValues.add(x); // add it to the list
-                            yValues.add(y);
-                        }
-                    }));
-
-        /* TODO
-        IntStream
             .range(0, connectedPixels.length) // for each row
             .forEach(rowIndex -> IntStream
                 .range(0, connectedPixels[0].length) // for each column
                 // only if the pixel is true and not the coordinates of the minutia in question
-                .filter(colIndex -> connectedPixels[rowIndex][colIndex] && !(rowIndex == row && colIndex == col))
+                .filter(colIndex -> connectedPixels[rowIndex][colIndex])
+                .filter(colIndex -> !(rowIndex == row && colIndex == col))
                 .forEach(colIndex -> { // add an adjusted value to the list
                     xValues.add(colIndex - col);
                     yValues.add(row - rowIndex);
                 }));
-         */
 
         double xySum = IntStream
             .range(0, xValues.size()) // for each index of xValues
@@ -406,10 +368,8 @@ public class Fingerprint {
             .forEach(rowIndex -> IntStream
                 .range(0, connectedPixels[0].length) // for each column
                 // only if the pixel is true and not the origin
-                .filter(colIndex ->
-                    connectedPixels[rowIndex][colIndex]
-                        && !(rowIndex == row && colIndex == col)
-                )
+                .filter(colIndex -> connectedPixels[rowIndex][colIndex])
+                .filter(colIndex -> !(rowIndex == row && colIndex == col))
                 .forEach(colIndex -> {
                     int x = colIndex - col; // make its coordinates relative to the new origin
                     int y = row - rowIndex;
@@ -585,8 +545,7 @@ public class Fingerprint {
                                             int maxOrientation) {
         return (int) minutiae1.stream()//.parallel() // for each minutia in minutiae1
             .filter(minutia1 -> minutiae2.stream()//.parallel()
-                .anyMatch(minutia2 -> // keep it if there is any in minutiae2 that is true below
-                { // keep it if there is any in minutiae2 that is true below
+                .anyMatch(minutia2 -> { // keep it if there is any in minutiae2 that is true below
                     var a = minutia1[0] - minutia2[0]; // Pythagoras
                     var b = minutia1[1] - minutia2[1];
                     return Math.sqrt(a * a + b * b) <= maxDistance

@@ -1,9 +1,6 @@
 package cs107;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -22,6 +19,12 @@ public class Main {
         // Tests functions separately
         //---------------------------
         SignatureChecks.check();
+
+        boolean[][] x = {
+            {true, false, true},
+            {false, true, false}
+        };
+
 
         // Tested and Passing
         testGetNeighbours();
@@ -90,8 +93,63 @@ public class Main {
         //testFailComparisons();
     }
 
+    // bonus : try to brute force the best constants
+    public static HashMap<String, Integer> bestConstants() {
+        // setting the best combination of constants so that the below intervals are correct
+        final var initial = new HashMap<String, Integer>();
+        initial.put("orientationDistance", 12);
+        initial.put("distanceThreshold", 1);
+        initial.put("foundThreshold", 16);
+        initial.put("orientationThreshold", 16);
+        initial.put("matchAngleOffset", 0);
+        initial.put("percentage", 0);
+
+        var best = new HashMap<String, Integer>();
+
+        IntStream
+            .range(0, 8)
+            .map(orientationDistance -> orientationDistance + initial.get("orientationDistance"))
+            .forEach(orientationDistance -> IntStream
+                .range(0, 8)
+                .map(distanceThreshold -> distanceThreshold + initial.get("distanceThreshold"))
+                .forEach(distanceThreshold -> IntStream
+                    .range(0, 8)
+                    .map(foundThreshold -> foundThreshold + initial.get("foundThreshold"))
+                    .forEach(foundThreshold -> IntStream
+                        .range(0, 8)
+                        .map(orientationThreshold -> orientationThreshold + initial.get("orientationThreshold"))
+                        .forEach(orientationThreshold -> IntStream
+                            .range(0, 8)
+                            .map(matchAngleOffset -> matchAngleOffset + initial.get("matchAngleOffset"))
+                            .forEach(matchAngleOffset -> {
+                                Fingerprint.ORIENTATION_DISTANCE = initial.get("orientationDistance") + orientationDistance;
+                                Fingerprint.DISTANCE_THRESHOLD = initial.get("distanceThreshold") + distanceThreshold;
+                                Fingerprint.FOUND_THRESHOLD = initial.get("foundThreshold") + foundThreshold;
+                                Fingerprint.ORIENTATION_THRESHOLD = initial.get("orientationThreshold") + orientationThreshold;
+                                Fingerprint.MATCH_ANGLE_OFFSET = initial.get("matchAngleOffset") + matchAngleOffset;
+
+                                // run a total of 8*10 tests
+                                int totalPercentage = IntStream
+                                    .range(0, 10)
+                                    .map(n -> testRandomComparisons())
+                                    .sum();
+                                // the percentage of correct matches we have with the currently tested constant's value
+                                totalPercentage = totalPercentage / 80;
+                                // if a better combination is found change our answer list "best"
+                                if (totalPercentage > initial.get("percentage")) {
+                                    best.put("orientationDistance", orientationDistance);
+                                    best.put("distanceThreshold", distanceThreshold);
+                                    best.put("foundThreshold", foundThreshold);
+                                    best.put("orientationThreshold", orientationThreshold);
+                                    best.put("matchAngleOffset", matchAngleOffset);
+                                    best.put("percentage", totalPercentage);
+                                }
+                            })))));
+        return best;
+    }
+
     // General testing utilities
-    public static void testRandomComparisons() {
+    public static int testRandomComparisons() {
         var randomCheck = new Random()
             .ints(1, 17)
             .limit(4).parallel() // for each fingerprint
@@ -114,6 +172,7 @@ public class Main {
                 .sum())
             .sum();
         System.out.println(randomCheck + " / 8");
+        return ((int) randomCheck);
     }
 
     public static void testSuccessComparisons() {
@@ -692,7 +751,7 @@ public class Main {
             int squareSideLength = 3;
             int col = 1;
             int row = 1;
-            boolean[][] clone = Fingerprint.ArrayCloneSquare(image, squareSideLength);
+            boolean[][] clone = Fingerprint.subClone(image, 0, 0, squareSideLength);
             boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
             relevant[row][col] = image[row][col];
             boolean[][] expected = new boolean[squareSideLength][squareSideLength];
@@ -700,7 +759,7 @@ public class Main {
             expected[0][0] = true;
             expected[2][1] = true;
             expected[2][2] = true;
-            Fingerprint.spreadPixel(clone, relevant, row, col);
+            Fingerprint.spreadCentrePixel(clone, relevant, row, col);
             if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
@@ -718,11 +777,11 @@ public class Main {
             int squareSideLength = 3;
             int col = 1;
             int row = 1;
-            boolean[][] clone = Fingerprint.ArrayCloneSquare(image, squareSideLength);
+            boolean[][] clone = Fingerprint.subClone(image, 0, 0, squareSideLength);
             boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
             relevant[row][col] = image[row][col];
             boolean[][] expected = new boolean[squareSideLength][squareSideLength];
-            Fingerprint.spreadPixel(clone, relevant, row, col);
+            Fingerprint.spreadCentrePixel(clone, relevant, row, col);
             if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
@@ -740,13 +799,13 @@ public class Main {
             int squareSideLength = 3;
             int col = 0;
             int row = 0;
-            boolean[][] clone = Fingerprint.ArrayCloneSquare(image, squareSideLength);
+            boolean[][] clone = Fingerprint.subClone(image, 0, 0, squareSideLength);
             boolean[][] relevant = new boolean[squareSideLength][squareSideLength];
             relevant[row][col] = image[row][col];
             boolean[][] expected = new boolean[squareSideLength][squareSideLength];
             expected[0][0] = true;
             expected[1][1] = true;
-            Fingerprint.spreadPixel(clone, relevant, row, col);
+            Fingerprint.spreadCentrePixel(clone, relevant, row, col);
             if (arrayEqual(relevant, expected)) {
                 System.out.println("OK");
             } else {
