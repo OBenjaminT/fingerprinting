@@ -1,9 +1,5 @@
 package cs107;
 
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,10 +68,9 @@ public class Fingerprint {
      *              <code>image[row].length</code>(excluded).
      * @return An array containing each neighbours' value.
      */
-    @Contract(value = "null, _, _ -> fail", pure = true)
-    public static boolean @Nullable [] getNeighbours(boolean[][] image, int row, int col) {
+    public static boolean [] getNeighbours(boolean[][] image, int row, int col) {
         // special case that is not expected (the image is supposed to have been checked earlier)
-        assert (image != null);
+        assert image != null;
 
         // check if pixel is in the image bounds
         if (row < 0
@@ -115,7 +110,8 @@ public class Fingerprint {
      *                   {@link #getNeighbours(boolean[][], int, int)}.
      * @return the number of black/<code>true</code> neighbours.
      */
-    public static int blackNeighbours(boolean @NotNull [] neighbours) {
+    public static int blackNeighbours(boolean [] neighbours) {
+        assert neighbours != null;
         return IntStream // accumulate how many neighbours are true
             .range(0, neighbours.length) // for each valid index of neighbours
             .map(index -> neighbours[index] ? 1 : 0) // if neighbours[index] is true return 1 and 0 if false
@@ -131,7 +127,8 @@ public class Fingerprint {
      *                   {@link #getNeighbours(boolean[][], int, int)}.
      * @return the number of white to black transitions.
      */
-    public static int transitions(boolean @NotNull [] neighbours) {
+    public static int transitions(boolean [] neighbours) {
+        assert neighbours != null;
         return IntStream
             .range(0, neighbours.length) // for each valid index of neighbours
             .map(index -> // turns every index into a 1 if neighbours[i] is false AND neighbours[index + 1] is true
@@ -171,7 +168,8 @@ public class Fingerprint {
      * @return array containing the boolean value of each pixel of the image after
      * applying the thinning algorithm.
      */
-    public static boolean @NotNull [][] thin(boolean @NotNull [][] image) {
+    public static boolean [][] thin(boolean [][] image) {
+        assert image != null;
         boolean[][] previous; // define the dimensions of the image
         do {
             previous = Arrays.stream(image).map(boolean[]::clone).toArray(boolean[][]::new);
@@ -189,7 +187,8 @@ public class Fingerprint {
      * @param step  the step to apply, Step 0 or Step 1.
      * @return A new array containing each pixel's value after the step.
      */
-    public static boolean @NotNull [][] thinningStep(boolean @NotNull [][] image, int step) {
+    public static boolean [][] thinningStep(boolean [][] image, int step) {
+        assert image != null;
         boolean[][] newImage = new boolean[image.length][image[0].length];
         IntStream
             .range(0, image.length) // for each valid index of image (rows)
@@ -228,7 +227,8 @@ public class Fingerprint {
      * <code>distance</code> and connected to the pixel at
      * <code>(row, col)</code>.
      */
-    public static boolean @NotNull [][] connectedPixels(boolean[][] image, int row, int col, int distance) {
+    public static boolean [][] connectedPixels(boolean[][] image, int row, int col, int distance) {
+        assert image != null;
         var squareSideLength = (2 * distance) + 1;
         // create a square clone of a subset of the image centered on the pixel and squareSideLength wide
         var clone = subClone(
@@ -254,7 +254,8 @@ public class Fingerprint {
         return relevant;
     }
 
-    static boolean @NotNull [][] subClone(boolean @NotNull [][] image, int topLeftRow, int topLeftCol, int width) {
+    static boolean [][] subClone(boolean [][] image, int topLeftRow, int topLeftCol, int width) {
+        assert image != null;
         final boolean[][] clone = new boolean[width][width];
         IntStream
             .range(Math.max(0, topLeftRow), Math.min(image.length, topLeftRow + width)) // for the overlapping rows
@@ -270,7 +271,9 @@ public class Fingerprint {
     }
 
 
-    static void spreadCentrePixel(boolean @NotNull [][] image, boolean[][] relevant, int rowIndex, int colIndex) {
+    static void spreadCentrePixel(boolean [][] image, boolean[][] relevant, int rowIndex, int colIndex) {
+        assert image != null;
+        assert relevant != null;
         // check if pixel is in the image bounds
         if (rowIndex < 0
             || rowIndex >= image.length
@@ -311,7 +314,8 @@ public class Fingerprint {
      * @param col             the col of the minutia.
      * @return the slope.
      */
-    public static double computeSlope(boolean @NotNull [][] connectedPixels, int row, int col) {
+    public static double computeSlope(boolean [][] connectedPixels, int row, int col) {
+        assert connectedPixels != null;
         var xValues = new ArrayList<Integer>();
         var yValues = new ArrayList<Integer>();
 
@@ -360,7 +364,8 @@ public class Fingerprint {
      *                        {@link #computeSlope(boolean[][], int, int)}.
      * @return the orientation of the minutia in radians.
      */
-    public static double computeAngle(boolean @NotNull [][] connectedPixels, int row, int col, double slope) {
+    public static double computeAngle(boolean [][] connectedPixels, int row, int col, double slope) {
+        assert connectedPixels != null;
         // atomics because they're used in a lambda expression below
         var pixelsAbove = new AtomicInteger();
         var pixelsUnder = new AtomicInteger();
@@ -401,6 +406,7 @@ public class Fingerprint {
      * @return The orientation in degrees.
      */
     public static int computeOrientation(boolean[][] image, int row, int col, int distance) {
+        assert image != null;
         var connectedPixels = connectedPixels(image, row, col, distance);
         var slope = computeSlope(connectedPixels, distance, distance);
         var angle = computeAngle(connectedPixels, distance, distance, slope);
@@ -417,7 +423,8 @@ public class Fingerprint {
      * the angle in degrees.
      * @see #thin(boolean[][])
      */
-    public static @NotNull List<int[]> extract(boolean[][] image) {
+    public static List<int[]> extract(boolean[][] image) {
+        assert image != null;
         var minutiaes = new ArrayList<int[]>();
         IntStream
             .range(1, image.length - 1) // for each pixel excluding the outer edge
@@ -449,8 +456,8 @@ public class Fingerprint {
      * @param rotation  the rotation in degrees.
      * @return the minutia rotated around the given center.
      */
-    @Contract("_, _, _, _ -> new")
-    public static int @NotNull [] applyRotation(int @NotNull [] minutia, int centerRow, int centerCol, int rotation) {
+    public static int [] applyRotation(int [] minutia, int centerRow, int centerCol, int rotation) {
+        assert minutia != null;
         // center on new origin
         int x = minutia[1] - centerCol;
         int y = centerRow - minutia[0];
@@ -473,8 +480,8 @@ public class Fingerprint {
      * @param colTranslation the translation along the columns.
      * @return the translated minutia.
      */
-    @Contract(value = "_, _, _ -> new", pure = true)
-    public static int @NotNull [] applyTranslation(int @NotNull [] minutia, int rowTranslation, int colTranslation) {
+    public static int [] applyTranslation(int [] minutia, int rowTranslation, int colTranslation) {
+        assert minutia != null;
         int newRow = minutia[0] - rowTranslation;
         int newCol = minutia[1] - colTranslation;
         return new int[]{newRow, newCol, minutia[2]};
@@ -492,12 +499,13 @@ public class Fingerprint {
      * @param rotation       the rotation.
      * @return the transformed minutia.
      */
-    public static int @NotNull [] applyTransformation(int[] minutia,
+    public static int [] applyTransformation(int[] minutia,
                                                       int centerRow,
                                                       int centerCol,
                                                       int rowTranslation,
                                                       int colTranslation,
                                                       int rotation) {
+        assert minutia != null;
         return applyTranslation(
             applyRotation(minutia, centerRow, centerCol, rotation),
             rowTranslation,
@@ -517,12 +525,13 @@ public class Fingerprint {
      * @param rotation       the rotation.
      * @return the list of transformed minutiae.
      */
-    public static List<int[]> applyTransformation(@NotNull List<int[]> minutiae,
+    public static List<int[]> applyTransformation(List<int[]> minutiae,
                                                   int centerRow,
                                                   int centerCol,
                                                   int rowTranslation,
                                                   int colTranslation,
                                                   int rotation) {
+        assert minutiae != null;
         return minutiae.stream()
             .map(i -> applyTransformation(i, centerRow, centerCol, rowTranslation, colTranslation, rotation))
             .collect(Collectors.toList());
@@ -539,10 +548,12 @@ public class Fingerprint {
      *                       minutiae to consider them as overlapping.
      * @return the number of overlapping minutiae.
      */
-    public static int matchingMinutiaeCount(@NotNull List<int[]> minutiae1,
+    public static int matchingMinutiaeCount(List<int[]> minutiae1,
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
+        assert minutiae1 != null;
+        assert minutiae2 != null;
         return (int) minutiae1.stream() // for each minutia in minutiae1
             .filter(minutia1 -> minutiae2.stream()
                 .anyMatch(minutia2 -> { // keep it if there is any in minutiae2 that is true below
@@ -562,7 +573,9 @@ public class Fingerprint {
      * @return Returns <code>true</code> if they match and <code>false</code>
      * otherwise.
      */
-    public static boolean match(@NotNull List<int[]> minutiae1, List<int[]> minutiae2) {
+    public static boolean match(List<int[]> minutiae1, List<int[]> minutiae2) {
+        assert minutiae1 != null;
+        assert minutiae2 != null;
         return minutiae1.stream()
             .anyMatch(min1 -> minutiae2.stream().parallel() // is there any in minutia2 where
                 .anyMatch(min2 -> IntStream // in the angle_offset range
