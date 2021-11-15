@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 /**
  * This class will not be graded. You can use it to test your program.
  */
-//@SuppressWarnings("all")
+@SuppressWarnings("all")
 public class Main {
     /**
      * Main entry point of the program.
@@ -15,16 +15,7 @@ public class Main {
      * @param args the command lines arguments of the program.
      */
     public static void main(String[] args) {
-        //---------------------------
-        // Tests functions separately
-        //---------------------------
         SignatureChecks.check();
-
-        boolean[][] x = {
-            {true, false, true},
-            {false, true, false}
-        };
-
 
         // Tested and Passing
         testGetNeighbours();
@@ -45,52 +36,28 @@ public class Main {
         testApplyRotation();
         testApplyTranslation();
 
-        testCompareFingerprints("1_1", "1_3", true);
-        testCompareFingerprints("1_5", "14_7", false);
-        testCompareFingerprints("1_1", "1_6", false); // 20
-        testCompareFingerprints("1_5", "2_3", true);
-
-        // buggy test?
         //testExtract();
 
-        // TODO test thinning steps 1 and 2
-
-
-        //testDrawSkeleton("1_1"); //draw skeleton of fingerprint 1_1.png
-        //testDrawSkeleton("1_2"); //draw skeleton of fingerprint 1_2.png
-        //testDrawSkeleton("2_1"); //draw skeleton of fingerprint 2_1.png
-
-        //testDrawMinutiae("1_1"); //draw minutiae of fingerprint 1_1.png
-        //testDrawMinutiae("1_2"); //draw minutiae of fingerprint 1_2.png
-        //testDrawMinutiae("2_1"); //draw minutiae of fingerprint 2_1.png
-
-        //testWithSkeleton();
-        //---------------------------
-        // Test overall functionality
-        //---------------------------+
-        // compare 1_1.png with 1_2.png: they are supposed to match
-        //testCompareFingerprints("1_1", "1_2", true);  //expected match: true
-
-        // compare 1_1.png with 2_1.png: they are not supposed to match
-        //testCompareFingerprints("1_1", "2_1", false); //expected match: false
-
-        // compare 1_1 with all other images of the same finger
-        //testCompareAllFingerprints("1_1", 1, true);
-
-        // compare 1_1 with all images of finger 2
-        //testCompareAllFingerprints("1_1", 2, false);
-
-        // compare 1_1 with all images of finger 3 to 16
-        /*
-        int correct = IntStream.range(3, 17).parallel()
-                .map(f -> testCompareAllFingerprints("1_1", f, false))
-                .sum();
-        System.out.println(correct);
-        */
+        var bestConstants = bestConstants();
+        System.out.println(
+            "Best constants: "
+                + "orientationDistance: "
+                + bestConstants.get("orientationDistance")
+                + "distanceThreshold: "
+                + bestConstants.get("distanceThreshold")
+                + "foundThreshold: "
+                + bestConstants.get("foundThreshold")
+                + "orientationThreshold: "
+                + bestConstants.get("orientationThreshold")
+                + "matchAngleOffset: "
+                + bestConstants.get("matchAngleOffset")
+                + "percentage: "
+                + bestConstants.get("percentage")
+        );
 
         testRandomComparisons();
-        //testSuccessComparisons();
-        //testFailComparisons();
+        testSuccessComparisons();
+        testFailComparisons();
     }
 
     // bonus : try to brute force the best constants
@@ -586,7 +553,6 @@ public class Main {
     }
 
     public static void testThinningStep() {
-        // TODO: add more test cases
         {
             System.out.print("test ThinningStep 1: ");
             boolean[][] image = {
@@ -896,7 +862,6 @@ public class Main {
     }
 
     public static void testComputeSlope() {
-        //TODO improve test
         {
             boolean[][] image = {
                 {false, false, false, true, false},
@@ -915,7 +880,6 @@ public class Main {
     }
 
     public static void testComputeAngle() {
-        //TODO improve test
         {
             boolean[][] image = {
                 {false, false, false, true, false},
@@ -957,7 +921,6 @@ public class Main {
     }
 
     public static void testComputeOrientation() {
-        // TODO more tests
         {
             System.out.print("test ComputeOrientation 1: ");
             boolean[][] image = {
@@ -977,7 +940,6 @@ public class Main {
     }
 
     public static void testApplyRotation() {
-        // TODO more tests
         var minutia = new int[]{1, 3, 10};
         int[] result;
         {
@@ -1034,7 +996,6 @@ public class Main {
     }
 
     public static void testApplyTranslation() {
-        // TODO more tests
         var minutia = new int[]{1, 3, 10};
         int[] result;
         {
@@ -1107,7 +1068,6 @@ public class Main {
      * it.
      */
     public static void testThin() {
-        // TODO more tests
         {
             boolean[][] image1 = Helper.readBinary("src/resources/test_inputs/1_1_small.png");
             boolean[][] expected = Helper.readBinary("src/resources/test_outputs/skeleton_1_1_small.png");
