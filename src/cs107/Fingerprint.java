@@ -156,11 +156,9 @@ public class Fingerprint {
                 && image1[0].length == image2[0].length // in both dimensions
                 && IntStream
                     .range(0, image1.length) // for each valid index of image (rows)
-                    //.parallel() // check each row simultaneously
                     .noneMatch( // make sure that all rows have no differing pixels
                         row -> IntStream
                             .range(0, image1[0].length) // for each valid index of image[0] (cols)
-                            //.parallel() // check each pixel simultaneously
                             .anyMatch(col -> image1[row][col] != image2[row][col])
                     )); // if any pixels are different -> true
         // @formatter:on
@@ -195,26 +193,24 @@ public class Fingerprint {
         boolean[][] newImage = new boolean[image.length][image[0].length];
         IntStream
             .range(0, image.length) // for each valid index of image (rows)
-            //.parallel() // process each row simultaneously
             .forEach(row -> IntStream
                 .range(0, image[0].length) // for each valid index of image[0] (cols)
-                //.parallel() // process each column simultaneously
                 .filter(col -> image[row][col]) // if the pixel is white it doesn't change
-                .forEach(col -> {// set newImage[row][col] = to the new pixels after seeing if they should stay
+                .forEach(col -> { // set newImage[row][col] = to the new pixels after seeing if they should stay
                         boolean[] neighbours = getNeighbours(image, row, col); // simplifies the logic below
                         // @formatter:off
-                    // if any condition is true the pixel stays true
-                    newImage[row][col] = neighbours == null
-                        || blackNeighbours(neighbours) <= 1
-                        || blackNeighbours(neighbours) >= 7
-                        || transitions(neighbours) != 1
-                        || (step != 0
-                                || (IntStream.of(2, 4).allMatch(i -> neighbours[i])
-                                    && IntStream.of(0, 6).anyMatch(i -> neighbours[i]))
-                            ) && (step != 1
-                                || (IntStream.of(0, 6).allMatch(i -> neighbours[i])
-                                    && IntStream.of(2, 4).anyMatch(i -> neighbours[i])));
-                    // @formatter:on
+                        // if any condition is true the pixel stays true (a boolean simplification of the given conditions)
+                        newImage[row][col] = neighbours == null
+                            || blackNeighbours(neighbours) <= 1
+                            || blackNeighbours(neighbours) >= 7
+                            || transitions(neighbours) != 1
+                            || (step != 0
+                                    || (IntStream.of(2, 4).allMatch(i -> neighbours[i])
+                                        && IntStream.of(0, 6).anyMatch(i -> neighbours[i]))
+                                ) && (step != 1
+                                    || (IntStream.of(0, 6).allMatch(i -> neighbours[i])
+                                        && IntStream.of(2, 4).anyMatch(i -> neighbours[i])));
+                        // @formatter:on
                     }
                 ));
         return newImage;
@@ -237,8 +233,8 @@ public class Fingerprint {
         // create a square clone of a subset of the image centered on the pixel and squareSideLength wide
         var clone = subClone(
             image,
-            row - distance,// + 1, // new center of sub image
-            col - distance,// - 1, // WTF?
+            row - distance, // new center of sub image
+            col - distance,
             squareSideLength
         );
         // set an empty array with the same center pixel as in clone
@@ -248,12 +244,12 @@ public class Fingerprint {
         do {
             previousArray = subClone(relevant, 0, 0, squareSideLength); // clone relevant to remember it
             IntStream
-                .range(0, squareSideLength) // for each row
+                .range(0, squareSideLength)
                 .forEach(rowIndex -> IntStream
-                    .range(0, squareSideLength) // for each column
+                    .range(0, squareSideLength)
                     .forEach(colIndex -> // make every pixel "infect" its true neighbours if it is true
-                    spreadCentrePixel(clone, relevant, rowIndex, colIndex)
-                ));
+                        spreadCentrePixel(clone, relevant, rowIndex, colIndex)
+                    ));
         } while (!identical(previousArray, relevant)); // repeat if there was a change
         return relevant;
     }
@@ -261,9 +257,9 @@ public class Fingerprint {
     static boolean @NotNull [][] subClone(boolean @NotNull [][] image, int topLeftRow, int topLeftCol, int width) {
         final boolean[][] clone = new boolean[width][width];
         IntStream
-            .range(Math.max(0, topLeftRow), Math.min(image.length, topLeftRow + width))
+            .range(Math.max(0, topLeftRow), Math.min(image.length, topLeftRow + width)) // for the overlapping rows
             .forEach(row ->
-                System.arraycopy(
+                System.arraycopy( // copy the overlapping columns
                     image[row],
                     Math.max(0, topLeftCol),
                     clone[row - topLeftRow],
@@ -274,7 +270,7 @@ public class Fingerprint {
     }
 
 
-    static void spreadCentrePixel(boolean @NotNull [][] image, boolean [][] relevant, int rowIndex, int colIndex) {
+    static void spreadCentrePixel(boolean @NotNull [][] image, boolean[][] relevant, int rowIndex, int colIndex) {
         // check if pixel is in the image bounds
         if (rowIndex < 0
             || rowIndex >= image.length
@@ -282,10 +278,11 @@ public class Fingerprint {
             || colIndex >= image[0].length
         ) return;
 
-        if (!relevant[rowIndex][colIndex]) return; // if the pixel is false it doesn't spread
+        // if the pixel is false it doesn't spread
+        if (!relevant[rowIndex][colIndex]) return;
 
-        // check which of the sides of the 3x3 around the pixel are inbounds
         // @formatter:off
+        // check which of the sides of the 3x3 around the pixel are inbounds
         var topRowInImage      = (rowIndex > 0                    );
         var rightColumnInImage = (colIndex < (image[0].length - 1));
         var bottomRowInImage   = (rowIndex < (image.length - 1)   );
@@ -319,27 +316,31 @@ public class Fingerprint {
         var yValues = new ArrayList<Integer>();
 
         IntStream
-            .range(0, connectedPixels.length) // for each row
+            .range(0, connectedPixels.length)
             .forEach(rowIndex -> IntStream
-                .range(0, connectedPixels[0].length) // for each column
-                // only if the pixel is true and not the coordinates of the minutia in question
+                .range(0, connectedPixels[0].length)
+                // only if the pixel is true
                 .filter(colIndex -> connectedPixels[rowIndex][colIndex])
+                // and only if the pixel isn't the minutia in question
                 .filter(colIndex -> !(rowIndex == row && colIndex == col))
                 .forEach(colIndex -> { // add an adjusted value to the list
                     xValues.add(colIndex - col);
                     yValues.add(row - rowIndex);
                 }));
 
+        // sum of x times y
         double xySum = IntStream
-            .range(0, xValues.size()) // for each index of xValues
-            .mapToDouble(i -> xValues.get(i) * yValues.get(i)) // multiply it with its equivalent in yValues
-            .sum(); // sum them up
-        double xSquared = xValues.stream() // for each value of xValues
-            .mapToDouble(i -> i * i) // square it
-            .sum(); // sum the squares
-        double ySquared = yValues.stream() // for each value of yValues
-            .mapToDouble(i -> i * i) // square it
-            .sum(); // sum the squares
+            .range(0, xValues.size())
+            .mapToDouble(i -> xValues.get(i) * yValues.get(i))
+            .sum();
+
+        // the sum of the squares of x and y
+        double xSquared = xValues.stream()
+            .mapToDouble(i -> i * i)
+            .sum();
+        double ySquared = yValues.stream()
+            .mapToDouble(i -> i * i)
+            .sum();
 
         // @formatter:off
         if (xSquared == 0       ) return Double.POSITIVE_INFINITY; // if vertical return infinity
@@ -364,12 +365,11 @@ public class Fingerprint {
         var pixelsAbove = new AtomicInteger();
         var pixelsUnder = new AtomicInteger();
         IntStream
-            .range(0, connectedPixels.length) // for each row
+            .range(0, connectedPixels.length)
             .forEach(rowIndex -> IntStream
-                .range(0, connectedPixels[0].length) // for each column
-                // only if the pixel is true and not the origin
-                .filter(colIndex -> connectedPixels[rowIndex][colIndex])
-                .filter(colIndex -> !(rowIndex == row && colIndex == col))
+                .range(0, connectedPixels[0].length)
+                .filter(colIndex -> connectedPixels[rowIndex][colIndex]) // only if the pixel is true
+                .filter(colIndex -> !(rowIndex == row && colIndex == col)) // and it's not the origin
                 .forEach(colIndex -> {
                     int x = colIndex - col; // make its coordinates relative to the new origin
                     int y = row - rowIndex;
@@ -523,9 +523,9 @@ public class Fingerprint {
                                                   int rowTranslation,
                                                   int colTranslation,
                                                   int rotation) {
-        return minutiae.stream()//.parallel() // for each minutia transform it
+        return minutiae.stream()
             .map(i -> applyTransformation(i, centerRow, centerCol, rowTranslation, colTranslation, rotation))
-            .collect(Collectors.toList()); // convert to a list again
+            .collect(Collectors.toList());
     }
 
     /**
@@ -543,12 +543,12 @@ public class Fingerprint {
                                             List<int[]> minutiae2,
                                             int maxDistance,
                                             int maxOrientation) {
-        return (int) minutiae1.stream()//.parallel() // for each minutia in minutiae1
-            .filter(minutia1 -> minutiae2.stream()//.parallel()
+        return (int) minutiae1.stream() // for each minutia in minutiae1
+            .filter(minutia1 -> minutiae2.stream()
                 .anyMatch(minutia2 -> { // keep it if there is any in minutiae2 that is true below
-                    var a = minutia1[0] - minutia2[0]; // Pythagoras
+                    var a = minutia1[0] - minutia2[0];
                     var b = minutia1[1] - minutia2[1];
-                    return Math.sqrt(a * a + b * b) <= maxDistance
+                    return Math.sqrt(a * a + b * b) <= maxDistance // Pythagoras
                         && Math.abs(minutia1[2] - minutia2[2]) <= maxOrientation;
                 })
             ).count();
@@ -563,26 +563,27 @@ public class Fingerprint {
      * otherwise.
      */
     public static boolean match(@NotNull List<int[]> minutiae1, List<int[]> minutiae2) {
-        return minutiae1.stream()//.parallel() // for all minutia1
-            .anyMatch(min1 -> minutiae2.stream()//.parallel() // is there any in minutia2 where
+        return minutiae1.stream()
+            .anyMatch(min1 -> minutiae2.stream().parallel() // is there any in minutia2 where
                 .anyMatch(min2 -> IntStream // in the angle_offset range
                     .rangeClosed(
                         (min2[2] - min1[2]) - MATCH_ANGLE_OFFSET,
                         (min2[2] - min1[2]) + MATCH_ANGLE_OFFSET
-                    )//.parallel()
+                    ).parallel()
                     .anyMatch(rotation -> // is any transformation similar by >= threshold amount
-                        matchingMinutiaeCount(
-                            minutiae1,
-                            applyTransformation(
-                                minutiae2,
-                                min1[0],
-                                min1[1],
-                                min2[0] - min1[0],
-                                min2[1] - min1[1],
-                                rotation
-                            ),
-                            DISTANCE_THRESHOLD,
-                            ORIENTATION_THRESHOLD
-                        ) >= FOUND_THRESHOLD)));
+                        FOUND_THRESHOLD <=
+                            matchingMinutiaeCount(
+                                minutiae1,
+                                applyTransformation(
+                                    minutiae2,
+                                    min1[0],
+                                    min1[1],
+                                    min2[0] - min1[0],
+                                    min2[1] - min1[1],
+                                    rotation
+                                ),
+                                DISTANCE_THRESHOLD,
+                                ORIENTATION_THRESHOLD
+                            ))));
     }
 }

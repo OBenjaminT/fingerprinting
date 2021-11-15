@@ -1021,7 +1021,7 @@ public class Main {
     }
 
     public static void testApplyTransformation() {
-        //TODO test this
+        // TODO test this
     }
 
     public static void testMatchingMinutiaeCount() {
