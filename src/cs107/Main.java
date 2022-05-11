@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * This class will not be graded. You can use it to test your program.
+ * You can use this class to test your program
  */
 @SuppressWarnings("all")
 public class Main {
