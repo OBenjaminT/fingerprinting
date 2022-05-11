@@ -17,6 +17,8 @@ public class Main {
     public static void main(String[] args) {
         SignatureChecks.check();
 
+        //bonus : almost all the tests have been improved and new ones were implemented
+
         // Tested and Passing
         testGetNeighbours();
         testBlackNeighbours();
